@@ -11,8 +11,10 @@ class RasterImage(colorInformation: Seq[Seq[Color]]) {
   val imageWidth: Int = colorInformation.head.size
 
   def draw(d: Drawable, drawableWidth: Double): RasterImage = {
+    println("starting draw")
     val pixelPerPoint = imageWidth / drawableWidth
     val newColorInfo = colorInformation.zipWithIndex.map { case (row, rowIndex) =>
+      println("drawing row " + rowIndex)
       row.zipWithIndex.map { case (color, columnIndex) =>
         val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
         val newColor = d.sample(pointToSample)
@@ -23,6 +25,7 @@ class RasterImage(colorInformation: Seq[Seq[Color]]) {
   }
 
   def output(fileName: String): Unit = {
+    println("starting Output")
     val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
     colorInformation.zipWithIndex.foreach { case (row, rowIndex) =>
       row.zipWithIndex.foreach { case (color, columnIndex) =>

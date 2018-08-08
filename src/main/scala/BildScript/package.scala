@@ -7,6 +7,7 @@ package object BildScript {
     def next: Addable
     def + (a: Addable): Seq[Addable] = Seq(this, a)
     def * (n: Int): Seq[Addable] = Seq.range(1, n).scanLeft(this)((a, _) => a.next)
+    def + : Addable = this
   }
 
   class RichAddableList(l: Seq[Addable]) {
