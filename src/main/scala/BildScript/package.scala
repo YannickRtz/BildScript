@@ -43,20 +43,20 @@ package object BildScript {
     def get: A
   }
 
-  case class Point(x: Double, y: Double) {
+  case class Point(x: Float, y: Float) {
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
   }
 
   case class Resolution(x: Int, y: Int)
 
-  class FixedDoubleGen(number: Double) extends Gen[Double] {
-    override def nextGen: Gen[Double] = new FixedDoubleGen(number)
-    override def get: Double = number
+  class FixedFloatGen(number: Float) extends Gen[Float] {
+    override def nextGen: Gen[Float] = new FixedFloatGen(number)
+    override def get: Float = number
   }
 
   implicit def genGet[A](r: Gen[A]): A = r.get
-  implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
-  implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
+  implicit def number2FixedIntGen(n: Int): Gen[Float] = new FixedFloatGen(n)
+  implicit def number2FixedFloatGen(n: Float): Gen[Float] = new FixedFloatGen(n)
 
 }

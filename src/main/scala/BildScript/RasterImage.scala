@@ -10,16 +10,23 @@ class RasterImage(colorInformation: Seq[Seq[Color]]) {
   val imageHeight: Int = colorInformation.size
   val imageWidth: Int = colorInformation.head.size
 
-  def draw(d: Drawable, drawableWidth: Double): RasterImage = {
+  def draw(d: Drawable, drawableWidth: Float): RasterImage = {
     println("starting draw")
     val pixelPerPoint = imageWidth / drawableWidth
-    val newColorInfo = colorInformation.zipWithIndex.map { case (row, rowIndex) =>
+    var rowIndex = -1
+    var columnIndex = -1
+    val newColorInfo = colorInformation.map { row =>
+      rowIndex = rowIndex + 1
       println("drawing row " + rowIndex)
-      row.zipWithIndex.map { case (color, columnIndex) =>
+      val result = row.map { _ =>
+        columnIndex = columnIndex + 1
         val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
         val newColor = d.sample(pointToSample)
-        color.overlay(newColor)
+        //color.overlay(newColor)
+        newColor
       }
+      columnIndex = 0
+      result
     }
     RasterImage(newColorInfo)
   }
