@@ -14,20 +14,20 @@ object Playground extends App {
   Bild (
     SolidSurface(Color(0,1,1,1)) +
 
-    /* Bild (
+    Bild (
       PositionTransform(0, 0) +
 
       Bild (
-        SolidSurface(Color(0,1,0,0.5f)) +
+        SolidSurface(Color(0,1,0,1)) +
         RectMask(0.2f, 0.2f) +
         PositionTransform(EvoGen(_%5*0.4f), EvoGen(x=>Math.floor(x/5).toFloat*0.4f))
-        //PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +
-      ) * 5000
+        //  PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +
+      ) * 100
 
-    ) */
+    )
 
   )
-    .raster(Resolution(2000, 3000), 2)
+    .raster(Resolution(1000, 1000), 2)
     .output("image.png")
 
 }
