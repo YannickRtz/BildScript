@@ -5,28 +5,41 @@ import java.io.File
 
 import javax.imageio.ImageIO
 
-class RasterImage(imageWidth: Int, imageHeight: Int) {
+class RasterImage(colorInformation: Seq[Seq[Color]]) {
 
-  val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
+  val imageHeight: Int = colorInformation.size
+  val imageWidth: Int = colorInformation.head.size
 
-  def draw(d: Drawable, drawableWidth: Float): Unit = {
+  def draw(d: Drawable, drawableWidth: Float): RasterImage = {
     println("starting draw")
-
     val pixelPerPoint = imageWidth / drawableWidth
-    val pointToSample = Point(0, 0)
-
-    for (rowIndex <- 0 until imageHeight) {
-      if (rowIndex % (imageHeight / 10) == 0)
-        println("drawing row " + rowIndex)
-      for (columnIndex <- 0 until imageWidth) {
-        pointToSample.x = columnIndex / pixelPerPoint
-        pointToSample.y = rowIndex / pixelPerPoint
-        bufferedImage.setRGB(rowIndex, columnIndex, d.sample(pointToSample))
+    var rowIndex = -1
+    var columnIndex = -1
+    val newColorInfo = colorInformation.map { row =>
+      rowIndex = rowIndex + 1
+      println("drawing row " + rowIndex)
+      val result = row.map { _ =>
+        columnIndex = columnIndex + 1
+        val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
+        val newColor = d.sample(pointToSample)
+        //color.overlay(newColor)
+        newColor
       }
+      columnIndex = 0
+      result
     }
+    RasterImage(newColorInfo)
   }
 
   def output(fileName: String): Unit = {
+    println("starting Output")
+    val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
+    colorInformation.zipWithIndex.foreach { case (row, rowIndex) =>
+      row.zipWithIndex.foreach { case (color, columnIndex) =>
+        val jColor = new java.awt.Color(color.red, color.green, color.blue, color.alpha)
+        bufferedImage.setRGB(columnIndex, rowIndex, jColor.getRGB)
+      }
+    }
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)
   }
@@ -36,7 +49,11 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
 object RasterImage {
 
   def apply(res: Resolution): RasterImage = {
-    new RasterImage(res.x, res.y)
+    val emptyColorInfo = Seq.fill(res.y)(Seq.fill(res.x)(Color.CLEAR))
+    new RasterImage(emptyColorInfo)
   }
+
+  def apply(colorInformation: Seq[Seq[Color]]): RasterImage =
+    new RasterImage(colorInformation)
 
 }

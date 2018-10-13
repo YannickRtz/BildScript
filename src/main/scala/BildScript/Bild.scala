@@ -4,10 +4,7 @@ import scala.annotation.tailrec
 
 class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transformation]) extends Drawable {
 
-  println("new bild")
-
   def next: Bild = {
-    println("bild next")
     val newMasks = masks.map(_.next)
     val newTransformations = transformations.map(_.next)
     val newLayers = layers.map {
@@ -17,18 +14,25 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     new Bild(newMasks, newLayers, newTransformations)
   }
 
-  def sample(p: Point): ARGB = {
+  def sample(p: Point): Color = {
+
     val afterTransform = transformations.foldLeft(p)((prev, transform) => transform.exec(prev))
+
     if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
-      0
+      Color.CLEAR
     else {
-      var c1 = 0
+      /*var keepSampling = true
+      var c1 = Color.CLEAR
       var layerIdx = layers.size - 1
-      while(ARGBalpha(c1) < 1 && layerIdx >= 0) {
-        c1 = ARGBoverlay(c1, layers(layerIdx).sample(afterTransform))
+      while(keepSampling && layerIdx > 0) {
+        val c0 = layers(layerIdx).sample(afterTransform)
+        c1 = c0.overlay(c1)
+        keepSampling = c1.alpha < 1
         layerIdx = layerIdx - 1
       }
-      c1
+      c1*/
+      val colors = layers.map(_.sample(afterTransform))
+      colors.foldLeft(Color.CLEAR)(_.overlay(_))
     }
   }
 
@@ -45,11 +49,8 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     else add(list.head).add(list.tail)
   }
 
-  def raster(resolution: Resolution, width: Float): RasterImage = {
-    val result = RasterImage(resolution)
-    result.draw(this, width)
-    result
-  }
+  def raster(resolution: Resolution, width: Float): RasterImage =
+    RasterImage(resolution).draw(this, width)
 
 }
 

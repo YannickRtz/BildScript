@@ -3,8 +3,6 @@ import scala.language.implicitConversions
 
 package object BildScript {
 
-  type ARGB = Int
-
   sealed trait Addable {
     def next: Addable
     def + (a: Addable): Seq[Addable] = Seq(this, a)
@@ -23,7 +21,7 @@ package object BildScript {
 
   trait Drawable extends Addable {
     def next: Drawable
-    def sample(p: Point): ARGB
+    def sample(p: Point): Color
   }
 
   trait Mask extends Addable {
@@ -45,24 +43,14 @@ package object BildScript {
     def get: A
   }
 
-  case class Point(var x: Float, var y: Float) {
-    println("new point")
-    def + (p2: Point): Point = {
-      x = x + p2.x
-      y = y + p2.y
-      this
-    }
-    def - (p2: Point): Point = {
-      x = x - p2.x
-      y = y - p2.y
-      this
-    }
+  case class Point(x: Float, y: Float) {
+    def + (p2: Point) = Point(x + p2.x, y + p2.y)
+    def - (p2: Point) = Point(x - p2.x, y - p2.y)
   }
 
   case class Resolution(x: Int, y: Int)
 
   class FixedFloatGen(number: Float) extends Gen[Float] {
-    println("new float gen")
     override def nextGen: Gen[Float] = new FixedFloatGen(number)
     override def get: Float = number
   }
@@ -70,13 +58,5 @@ package object BildScript {
   implicit def genGet[A](r: Gen[A]): A = r.get
   implicit def number2FixedIntGen(n: Int): Gen[Float] = new FixedFloatGen(n)
   implicit def number2FixedFloatGen(n: Float): Gen[Float] = new FixedFloatGen(n)
-
-  def ARGBalpha(c: ARGB): ARGB = {
-    (c>>24)&255
-  }
-
-  def ARGBoverlay(c1: ARGB, c2: ARGB): ARGB = {
-    c2
-  }
 
 }
