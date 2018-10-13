@@ -21,18 +21,9 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
       Color.CLEAR
     else {
-      /*var keepSampling = true
-      var c1 = Color.CLEAR
-      var layerIdx = layers.size - 1
-      while(keepSampling && layerIdx > 0) {
-        val c0 = layers(layerIdx).sample(afterTransform)
-        c1 = c0.overlay(c1)
-        keepSampling = c1.alpha < 1
-        layerIdx = layerIdx - 1
-      }
-      c1*/
       val colors = layers.map(_.sample(afterTransform))
-      colors.foldLeft(Color.CLEAR)(_.overlay(_))
+      val result = colors.foldLeft(Color.CLEAR)(_.overlay(_))
+      result
     }
   }
 
@@ -49,7 +40,7 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     else add(list.head).add(list.tail)
   }
 
-  def raster(resolution: Resolution, width: Float): RasterImage =
+  def raster(resolution: Resolution, width: Double): RasterImage =
     RasterImage(resolution).draw(this, width)
 
 }
