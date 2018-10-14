@@ -18,7 +18,7 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
         println("drawing row " + rowIndex)
       for (columnIndex <- 0 until imageWidth) {
         val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
-        bufferedImage.setRGB(rowIndex, columnIndex, d.sample(pointToSample).toARGB)
+        bufferedImage.setRGB(columnIndex, rowIndex, d.sample(pointToSample).toARGB)
       }
     }
 
