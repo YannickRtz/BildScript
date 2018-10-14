@@ -13,11 +13,14 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
     println("starting draw")
     val pixelPerPoint = imageWidth / drawableWidth
 
+    val pointToSample = Point(0, 0)
+
     for (rowIndex <- 0 until imageHeight) {
       if (rowIndex % (imageHeight / 10) == 0)
         println("drawing row " + rowIndex)
       for (columnIndex <- 0 until imageWidth) {
-        val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
+        pointToSample.x = columnIndex / pixelPerPoint
+        pointToSample.y = rowIndex / pixelPerPoint
         bufferedImage.setRGB(rowIndex, columnIndex, d.sample(pointToSample).toARGB)
       }
     }
