@@ -33,7 +33,7 @@ package object BildScript {
 
   trait Transformation extends Addable {
     def next: Transformation
-    def exec(p: Point): Unit
+    def exec(p: Point): Point
   }
 
   trait Filling extends Drawable {
@@ -45,22 +45,9 @@ package object BildScript {
     def get: A
   }
 
-  case class Point(var x: Double, var y: Double) {
-    //println("new point")
-
-    def addCopy(p2: Point) = Point(x + p2.x, y + p2.y)
-
-    def subtractCopy(p2: Point) = Point(x - p2.x, y - p2.y)
-
-    def subtractMutate(p2: Point): Unit = {
-      x = x + p2.x
-      y = y + p2.y
-    }
-
-    def addMutate(p2: Point): Unit = {
-      x = x - p2.x
-      y = y - p2.y
-    }
+  case class Point(x: Double, y: Double) {
+    def + (p2: Point) = Point(x + p2.x, y + p2.y)
+    def - (p2: Point) = Point(x - p2.x, y - p2.y)
   }
 
   case class Resolution(x: Int, y: Int)

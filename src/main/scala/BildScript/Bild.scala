@@ -15,13 +15,13 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
   }
 
   def sample(p: Point): Color = {
-    val pCopy = p.copy()
-    transformations.foreach(_.exec(pCopy))
 
-    if (masks.nonEmpty && !masks.exists(_.test(pCopy)))
+    val afterTransform = transformations.foldLeft(p)((prev, transform) => transform.exec(prev))
+
+    if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
       Color.CLEAR
     else {
-      val colors = layers.map(_.sample(pCopy))
+      val colors = layers.map(_.sample(afterTransform))
       val result = colors.foldLeft(Color.CLEAR)(_.overlay(_))
       result
     }
