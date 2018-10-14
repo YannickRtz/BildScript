@@ -45,29 +45,14 @@ package object BildScript {
     def get: A
   }
 
-  case class Point(var x: Double, var y: Double) {
-    println("new point")
-
-    def addCopy (p2: Point) = Point(x + p2.x, y + p2.y)
-    def subtractCopy (p2: Point) = Point(x - p2.x, y - p2.y)
-
-    def + (p2: Point): Point = {
-      x = x + p2.x
-      y = y + p2.y
-      this
-    }
-
-    def - (p2: Point): Point = {
-      x = x - p2.x
-      y = y - p2.y
-      this
-    }
+  case class Point(x: Double, y: Double) {
+    def + (p2: Point) = Point(x + p2.x, y + p2.y)
+    def - (p2: Point) = Point(x - p2.x, y - p2.y)
   }
 
   case class Resolution(x: Int, y: Int)
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
-    println("new double gen")
     override def nextGen: Gen[Double] = new FixedDoubleGen(number)
     override def get: Double = number
   }
