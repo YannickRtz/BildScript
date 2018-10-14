@@ -40,8 +40,11 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     else add(list.head).add(list.tail)
   }
 
-  def raster(resolution: Resolution, width: Double): RasterImage =
-    RasterImage(resolution).draw(this, width)
+  def raster(resolution: Resolution, width: Double): RasterImage = {
+    val result = RasterImage(resolution)
+    result.draw(this, width)
+    result
+  }
 
 }
 
