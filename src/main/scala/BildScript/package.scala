@@ -1,4 +1,6 @@
 
+import java.awt.image.BufferedImage
+
 import scala.language.implicitConversions
 
 package object BildScript {
@@ -23,7 +25,7 @@ package object BildScript {
 
   trait Drawable extends Addable {
     def next: Drawable
-    def sample(p: Point): Color
+    def trace(p: Point): Color
   }
 
   trait Mask extends Addable {

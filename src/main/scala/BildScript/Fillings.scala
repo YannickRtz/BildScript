@@ -11,7 +11,7 @@ object Fillings {
       println("solid filling")
       SolidSurface(color)
     }
-    override def sample(p: Point): Color = color
+    override def trace(p: Point): Color = color
 
   }
 

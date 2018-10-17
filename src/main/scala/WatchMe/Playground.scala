@@ -18,7 +18,7 @@ object Playground extends App {
         PositionTransform(0, 0) +
 
           Bild (
-            SolidSurface(Color(0,1,0,0.5f)) +
+            SolidSurface(Color(0,1,0,1)) +
               RectMask(0.02, 0.02) +
               PositionTransform(EvoGen(_%30*0.04), EvoGen(x=>Math.floor(x/30)*0.04))
             //PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +

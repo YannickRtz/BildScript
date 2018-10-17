@@ -1,5 +1,7 @@
 package BildScript
 
+import java.awt.image.BufferedImage
+
 import scala.annotation.tailrec
 
 class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transformation]) extends Drawable {
@@ -14,16 +16,39 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     new Bild(newMasks, newLayers, newTransformations)
   }
 
-  def sample(p: Point): Color = {
+  def trace(p: Point): Color = {
 
     val afterTransform = transformations.foldLeft(p)((prev, transform) => transform.exec(prev))
 
     if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
       Color.CLEAR
     else {
-      val colors = layers.map(_.sample(afterTransform))
+      val colors = layers.map(_.trace(afterTransform))
       val result = colors.foldLeft(Color.CLEAR)(_.overlay(_))
       result
+    }
+  }
+
+  def draw(canvas: BufferedImage, pixelPerPoint: Double): Unit = {
+    val maxWidth = canvas.getWidth
+    val maxHeight = canvas.getHeight
+    val minWidth = 0
+    val minHeight = 0
+    // Todo: Use bounding box
+    for (y <- minHeight until maxHeight) {
+      for (x <- minWidth until maxWidth) {
+        val afterTransform = transformations.foldLeft(Point(x / pixelPerPoint,y / pixelPerPoint))((prev, transform) => transform.exec(prev))
+        if (masks.isEmpty || masks.exists(_.test(afterTransform)))
+          layers.foreach {
+            case f: Filling => canvas.setRGB(x, y, f.trace(afterTransform).toARGB)
+            case _ => Unit
+          }
+      }
+    }
+
+    layers.foreach {
+      case b: Bild => b.draw(canvas, pixelPerPoint)
+      case _ => Unit
     }
   }
 
