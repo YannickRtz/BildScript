@@ -42,7 +42,7 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
   def draw(d: Bild, drawableWidth: Double): Unit = {
     println("starting draw")
     val pixelPerPoint = imageWidth / drawableWidth
-    d.draw(bufferedImage, pixelPerPoint)
+    d.draw(bufferedImage, pixelPerPoint, Seq())
   }
 
   def output(fileName: String): Unit = {

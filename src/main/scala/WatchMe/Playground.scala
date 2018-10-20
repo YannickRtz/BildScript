@@ -15,7 +15,7 @@ object Playground extends App {
     SolidSurface(Color(0,1,1,1)) +
 
       Bild (
-        PositionTransform(0, 0) +
+        PositionTransform(0.5, 0.5) +
 
           Bild (
             SolidSurface(Color(0,1,0,1)) +

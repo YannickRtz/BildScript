@@ -29,15 +29,16 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     }
   }
 
-  def draw(canvas: BufferedImage, pixelPerPoint: Double): Unit = {
+  def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
     val maxWidth = canvas.getWidth
     val maxHeight = canvas.getHeight
     val minWidth = 0
     val minHeight = 0
+    val allTransformations = prevTransformations ++ transformations
     // Todo: Use bounding box
     for (y <- minHeight until maxHeight) {
       for (x <- minWidth until maxWidth) {
-        val afterTransform = transformations.foldLeft(Point(x / pixelPerPoint,y / pixelPerPoint))((prev, transform) => transform.exec(prev))
+        val afterTransform = allTransformations.foldLeft(Point(x / pixelPerPoint,y / pixelPerPoint))((prev, transform) => transform.exec(prev))
         if (masks.isEmpty || masks.exists(_.test(afterTransform)))
           layers.foreach {
             case f: Filling => canvas.setRGB(x, y, f.trace(afterTransform).toARGB)
@@ -47,7 +48,7 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     }
 
     layers.foreach {
-      case b: Bild => b.draw(canvas, pixelPerPoint)
+      case b: Bild => b.draw(canvas, pixelPerPoint, allTransformations)
       case _ => Unit
     }
   }
