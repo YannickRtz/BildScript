@@ -9,7 +9,7 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
 
   val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
 
-  def trace(d: Drawable, drawableWidth: Double): Unit = {
+  def trace(b: Bild, drawableWidth: Double): Unit = {
     println("starting trace")
     val pixelPerPoint = imageWidth / drawableWidth
 
@@ -18,7 +18,7 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
         println("drawing row " + rowIndex)
       for (columnIndex <- 0 until imageWidth) {
         val pointToSample = Point(columnIndex / pixelPerPoint, rowIndex / pixelPerPoint)
-        bufferedImage.setRGB(columnIndex, rowIndex, d.trace(pointToSample).toARGB)
+        bufferedImage.setRGB(columnIndex, rowIndex, b.trace(pointToSample).toARGB)
       }
     }
 

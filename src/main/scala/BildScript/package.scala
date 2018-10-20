@@ -7,7 +7,7 @@ package object BildScript {
 
   type ARGB = Int
 
-  sealed trait Addable {
+  trait Addable {
     def next: Addable
     def + (a: Addable): Seq[Addable] = Seq(this, a)
     def * (n: Int): Seq[Addable] = Seq.range(1, n).scanLeft(this)((a, _) => a.next)
@@ -23,11 +23,6 @@ package object BildScript {
   implicit def list2RichAddableList(l: Seq[Addable]): RichAddableList = new RichAddableList(l)
   implicit def addable2RichAddableList(a: Addable): RichAddableList = new RichAddableList(Seq(a))
 
-  trait Drawable extends Addable {
-    def next: Drawable
-    def trace(p: Point): Color
-  }
-
   trait Mask extends Addable {
     val boundingBoxDimensions: Point
     def next: Mask
@@ -39,8 +34,9 @@ package object BildScript {
     def exec(p: Point): Point
   }
 
-  trait Filling extends Drawable {
+  trait Filling extends Addable {
     def next: Filling
+    def trace(p: Point): Color
   }
 
   trait Gen[A] {

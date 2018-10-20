@@ -6,16 +6,13 @@ import BildScript.Masks.RectMask
 
 import scala.annotation.tailrec
 
-class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transformation]) extends Drawable {
+class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
 
   def next: Bild = {
     val newMasks = masks.map(_.next)
     val newTransformations = transformations.map(_.next)
-    val newLayers = layers.map {
-      case l: Filling => l.next
-      case b: Bild => b
-    }
-    new Bild(newMasks, newLayers, newTransformations)
+    val newFillings = fillings.map(_.next)
+    new Bild(newMasks, newFillings, newTransformations, bilder)
   }
 
   def trace(p: Point): Color = {
@@ -25,8 +22,9 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
     if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
       Color.CLEAR
     else {
-      val colors = layers.map(_.trace(afterTransform))
-      val result = colors.foldLeft(Color.CLEAR)(_.overlay(_))
+      val colorsBilder = bilder.map(_.trace(afterTransform))
+      val colorsFillings = fillings.map(_.trace(afterTransform))
+      val result = (colorsBilder ++ colorsFillings).foldLeft(Color.CLEAR)(_.overlay(_))
       result
     }
   }
@@ -44,16 +42,15 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
       val minHeight = Math.max(0, Math.round(topLeftPoint.y * pixelPerPoint).toInt)
       val maxWidth = Math.min(canvas.getWidth, Math.round(bottomRightPoint.x * pixelPerPoint).toInt)
       val maxHeight = Math.min(canvas.getHeight, Math.round(bottomRightPoint.y * pixelPerPoint).toInt)
-      // TODO: Skip if no fillings
-      for (y <- minHeight until maxHeight) {
-        for (x <- minWidth until maxWidth) {
-          // val afterTransform = applyTranformations(allTransformations, Point(x / pixelPerPoint,y / pixelPerPoint))
-          val withoutTransform = Point((x / pixelPerPoint) - topLeftPoint.x, (y / pixelPerPoint) - topLeftPoint.y)
-          if (m.test(withoutTransform))
-            layers.foreach {
-              case f: Filling => canvas.setRGB(x, y, f.trace(withoutTransform).toARGB)
-              case _ => Unit
+      if (fillings.nonEmpty) {
+        for (y <- minHeight until maxHeight) {
+          for (x <- minWidth until maxWidth) {
+            // val afterTransform = applyTranformations(allTransformations, Point(x / pixelPerPoint,y / pixelPerPoint))
+            val withoutTransform = Point((x / pixelPerPoint) - topLeftPoint.x, (y / pixelPerPoint) - topLeftPoint.y)
+            if (m.test(withoutTransform)) fillings.foreach { f =>
+              canvas.setRGB(x, y, f.trace(withoutTransform).toARGB)
             }
+          }
         }
       }
     }
@@ -73,17 +70,17 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
       }
     }*/
 
-    // TODO: Separate Layers into two collections to get rid of this match expression
-    layers.foreach {
+    bilder.foreach {
       case b: Bild => b.draw(canvas, pixelPerPoint, allTransformations)
       case _ => Unit
     }
   }
 
   def add(a: Addable): Bild = a match {
-    case m: Mask => new Bild(masks :+ m, layers, transformations)
-    case d: Drawable => new Bild(masks, layers :+ d, transformations)
-    case t: Transformation => new Bild(masks, layers, transformations :+ t)
+    case m: Mask => new Bild(masks :+ m, fillings, transformations, bilder)
+    case f: Filling => new Bild(masks, fillings :+ f, transformations, bilder)
+    case t: Transformation => new Bild(masks, fillings, transformations :+ t, bilder)
+    case b: Bild => new Bild(masks, fillings, transformations, bilder :+ b)
   }
 
   @tailrec
@@ -102,7 +99,7 @@ class Bild(masks: Seq[Mask], layers: Seq[Drawable], transformations: Seq[Transfo
 }
 
 object Bild {
-  def apply(): Bild = new Bild(Seq(), Seq(), Seq())
+  def apply(): Bild = new Bild(Seq(), Seq(), Seq(), Seq())
   def apply(l: Seq[Addable]): Bild = apply().add(l)
   def apply(a: Addable): Bild = apply().add(a)
 }
