@@ -81,6 +81,9 @@ fabric.properties
 
 # End of https://www.gitignore.io/api/scala,intellij
 
-*.png
 target
 project/target
+
+.idea/modules/BildScript1.iml
+.idea/modules/bildscript1-build.iml
+.idea/misc.xml
