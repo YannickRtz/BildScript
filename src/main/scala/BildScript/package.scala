@@ -29,6 +29,7 @@ package object BildScript {
   }
 
   trait Mask extends Addable {
+    val boundingBoxDimensions: Point
     def next: Mask
     def test(p: Point): Boolean
   }
