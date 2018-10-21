@@ -7,6 +7,7 @@ import BildScript.Masks.RectMask
 import scala.annotation.tailrec
 
 class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
+  println("new bild")
 
   def next: Bild = {
     val newMasks = masks.map(_.next)

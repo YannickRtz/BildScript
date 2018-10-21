@@ -8,7 +8,7 @@ object Fillings {
 
     // TODO: Enable random colors
     override def next: SolidSurface = {
-      println("solid filling")
+      // println("solid filling")
       SolidSurface(color)
     }
     override def trace(p: Point): Color = color

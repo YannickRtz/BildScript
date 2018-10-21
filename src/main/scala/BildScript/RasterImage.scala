@@ -6,6 +6,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 class RasterImage(imageWidth: Int, imageHeight: Int) {
+  println("new rasterimage")
 
   val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
 
