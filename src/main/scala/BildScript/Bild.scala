@@ -92,7 +92,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def raster(resolution: Resolution, width: Double): RasterImage = {
-    println("starting raster")
+    println("Rasterization...")
     val result = RasterImage(resolution)
     result.draw(this, width)
     result

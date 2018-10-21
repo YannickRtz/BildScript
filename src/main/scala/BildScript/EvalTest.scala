@@ -30,6 +30,7 @@ object EvalTest extends App {
   while (key != null) {
     key.pollEvents.forEach { event: WatchEvent[_] =>
       println("Event kind:" + event.kind + ". File affected: " + event.context + ".")
+      println("Compilation...")
       val allLines = Files.readAllLines(Paths.get("./src/main/scala/WatchMe/" + event.context))
       val filtered = JavaConverters.asScalaBuffer(allLines).toList.filter { str =>
         if (str.contains("package")) false
@@ -37,8 +38,8 @@ object EvalTest extends App {
         else !str.contains("}") && !str.contains("{")
       }
       val str = filtered.mkString("\n")
+      println("Starting sketch...")
       toolbox.eval(toolbox.parse(str))
-      println("Successfully compiled?")
     }
     key.reset
     key = watchService.take()

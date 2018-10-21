@@ -41,7 +41,6 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
   }
 
   def draw(d: Bild, drawableWidth: Double): Unit = {
-    println("starting draw")
     val pixelPerPoint = imageWidth / drawableWidth
     d.draw(bufferedImage, pixelPerPoint, Seq())
   }
@@ -55,7 +54,7 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
         bufferedImage.setRGB(columnIndex, rowIndex, jColor.getRGB)
       }
     }*/
-    println("starting output")
+    println("File output...")
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)
     println("done")
