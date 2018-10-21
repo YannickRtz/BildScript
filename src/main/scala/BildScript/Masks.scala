@@ -3,7 +3,7 @@ package BildScript
 object Masks {
 
   case class RectMask(widthGen: Gen[Double], heightGen: Gen[Double]) extends Mask {
-    println("new rect mask")
+    // println("new rect mask")
 
     val width: Double = widthGen.get
     val height: Double = heightGen.get

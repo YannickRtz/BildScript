@@ -11,6 +11,8 @@ import scala.language.postfixOps
 
 object Playground extends App {
 
+  println("starting sketch")
+
   Bild (
     SolidSurface(Color(1,0,0,1)) +
 
@@ -22,7 +24,7 @@ object Playground extends App {
               RectMask(0.02, 0.02) +
               PositionTransform(EvoGen(_%30*0.04), EvoGen(x=>Math.floor(x/30)*0.04))
             //PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +
-          ) * 100
+          ) * 5000
 
       )
 

@@ -6,7 +6,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 class RasterImage(imageWidth: Int, imageHeight: Int) {
-  println("new rasterimage")
+  // println("new rasterimage")
 
   val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
 
@@ -55,8 +55,10 @@ class RasterImage(imageWidth: Int, imageHeight: Int) {
         bufferedImage.setRGB(columnIndex, rowIndex, jColor.getRGB)
       }
     }*/
+    println("starting output")
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)
+    println("done")
   }
 
 }

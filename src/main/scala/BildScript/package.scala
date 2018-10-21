@@ -45,17 +45,17 @@ package object BildScript {
   }
 
   case class Point(x: Double, y: Double) {
-    println("new point")
+    // println("new point")
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
   }
 
   case class Resolution(x: Int, y: Int) {
-    println("new resolution")
+    // println("new resolution")
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
-    println("new fixed double gen")
+    // println("new fixed double gen")
     override def nextGen: Gen[Double] = new FixedDoubleGen(number)
     override def get: Double = number
   }

@@ -7,7 +7,7 @@ import BildScript.Masks.RectMask
 import scala.annotation.tailrec
 
 class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
-  println("new bild")
+  // println("new bild")
 
   def next: Bild = {
     val newMasks = masks.map(_.next)
@@ -92,6 +92,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def raster(resolution: Resolution, width: Double): RasterImage = {
+    println("starting raster")
     val result = RasterImage(resolution)
     result.draw(this, width)
     result

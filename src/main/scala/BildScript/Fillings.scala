@@ -4,11 +4,10 @@ object Fillings {
 
   case class SolidSurface(color: Color) extends Filling {
 
-    println("new filling")
+    // println("new filling")
 
     // TODO: Enable random colors
     override def next: SolidSurface = {
-      // println("solid filling")
       SolidSurface(color)
     }
     override def trace(p: Point): Color = color
