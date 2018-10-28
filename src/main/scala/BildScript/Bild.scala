@@ -3,8 +3,10 @@ package BildScript
 import java.awt.image.BufferedImage
 
 import BildScript.Masks.RectMask
+import BildScript.Transformations.PositionTransform
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
   // println("new bild")
@@ -18,36 +20,66 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
   def trace(p: Point): Color = {
 
-    val afterTransform = transformations.foldLeft(p)((prev, transform) => transform.exec(prev))
+    val afterTransform = transformations.foldRight(p)((transform, prev) => transform.execReverse(prev))
 
     if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
       Color.CLEAR
     else {
       val colorsBilder = bilder.map(_.trace(afterTransform))
       val colorsFillings = fillings.map(_.trace(afterTransform))
-      val result = (colorsBilder ++ colorsFillings).foldLeft(Color.CLEAR)(_.overlay(_))
+      val result = (colorsFillings ++ colorsBilder).foldLeft(Color.CLEAR)(_.overlay(_))
       result
     }
   }
 
   def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
-    val allTransformations = prevTransformations ++ transformations
+    val allTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
+    val newTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
+    val prevNonlocalTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
+    allTransformations ++= prevTransformations ++= transformations
+    val allNonlocalTransformations = allTransformations.filter {
+      case _: LocalTransform => false
+      case _ => true
+    }
+    newTransformations ++= allNonlocalTransformations
+    allTransformations.reverse.foreach {
+      case l: LocalTransform =>
+        val newPivot = prevNonlocalTransformations.foldRight(l.pivotPoint)((t, prev) => t.execReverse(prev))
+        val vector = allNonlocalTransformations.foldLeft(newPivot)((prev, t) => t.exec(prev))
+        newTransformations += PositionTransform(-1 * vector.x, -1 * vector.y)
+        newTransformations += l
+        newTransformations += PositionTransform(vector.x, vector.y)
+
+      case t: Transformation =>
+        prevNonlocalTransformations += t
+    }
+
     // Enable drawing when no mask is set:
     val defaultMask =
       if (masks.isEmpty) Seq(RectMask(canvas.getWidth / pixelPerPoint, canvas.getHeight / pixelPerPoint))
       else Seq()
     (defaultMask ++ masks).foreach { m =>
-      val topLeftPoint = allTransformations.foldLeft(Point(0,0))((prev, t) => t.exec(prev))
-      val bottomRightPoint = allTransformations.foldLeft(m.boundingBoxDimensions)((prev, t) => t.exec(prev))
-      val minWidth = Math.max(0, Math.round(topLeftPoint.x * pixelPerPoint).toInt)
-      val minHeight = Math.max(0, Math.round(topLeftPoint.y * pixelPerPoint).toInt)
-      val maxWidth = Math.min(canvas.getWidth, Math.round(bottomRightPoint.x * pixelPerPoint).toInt)
-      val maxHeight = Math.min(canvas.getHeight, Math.round(bottomRightPoint.y * pixelPerPoint).toInt)
+      val topLeftBBPoint = newTransformations.foldLeft(Point(0,0))((prev, t) => t.exec(prev))
+      val bottomRightBBPoint = newTransformations.foldLeft(m.boundingBoxDimensions)((prev, t) => t.exec(prev))
+      val topRightBBPoint = newTransformations.foldLeft(Point(m.boundingBoxDimensions.x, 0))((prev, t) => t.exec(prev))
+      val bottomLeftBBPoint = newTransformations.foldLeft(Point(0, m.boundingBoxDimensions.y))((prev, t) => t.exec(prev))
+      val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
+      val minWidth = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
+      val minHeight = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
+      val maxWidth = Math.min(canvas.getWidth, Math.round(BBPoints.maxBy(_.x).x * pixelPerPoint).toInt)
+      val maxHeight = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
+      // To skip bounding box:
+      /*val maxWidth = canvas.getWidth
+      val maxHeight = canvas.getHeight
+      val minWidth = 0
+      val minHeight = 0*/
       if (fillings.nonEmpty) {
         for (y <- minHeight until maxHeight) {
           for (x <- minWidth until maxWidth) {
             // val afterTransform = applyTranformations(allTransformations, Point(x / pixelPerPoint,y / pixelPerPoint))
-            val withoutTransform = Point((x / pixelPerPoint) - topLeftPoint.x, (y / pixelPerPoint) - topLeftPoint.y)
+            //if (allTransformations.size > 4)
+            //println("halt")
+            val withoutTransform = newTransformations.foldRight(Point(x / pixelPerPoint,y / pixelPerPoint))((transform, prev) => transform.execReverse(prev))
             if (m.test(withoutTransform)) fillings.foreach { f =>
               canvas.setRGB(x, y, f.trace(withoutTransform).toARGB)
             }
@@ -55,21 +87,6 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         }
       }
     }
-
-/*    val maxWidth = canvas.getWidth
-    val maxHeight = canvas.getHeight
-    val minWidth = 0
-    val minHeight = 0
-    for (y <- minHeight until maxHeight) {
-      for (x <- minWidth until maxWidth) {
-        val afterTransform = allTransformations.foldLeft(Point(x / pixelPerPoint,y / pixelPerPoint))((prev, transform) => transform.exec(prev))
-        if (masks.isEmpty || masks.exists(_.test(afterTransform)))
-          layers.foreach {
-            case f: Filling => canvas.setRGB(x, y, f.trace(afterTransform).toARGB)
-            case _ => Unit
-          }
-      }
-    }*/
 
     bilder.foreach {
       case b: Bild => b.draw(canvas, pixelPerPoint, allTransformations)
@@ -95,6 +112,13 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
     println("Rasterization...")
     val result = RasterImage(resolution)
     result.draw(this, width)
+    result
+  }
+
+  def raytrace(resolution: Resolution, width: Double): RasterImage = {
+    println("Ray tracing...")
+    val result = RasterImage(resolution)
+    result.trace(this, width)
     result
   }
 

@@ -4,7 +4,7 @@ import BildScript._
 import BildScript.Fillings.SolidSurface
 import BildScript.Generators.EvoGen
 import BildScript.Masks.RectMask
-import BildScript.Transformations.PositionTransform
+import BildScript.Transformations.{PositionTransform, RotationTransform}
 import BildScript.{Bild, Color, Resolution}
 
 import scala.language.postfixOps
@@ -17,14 +17,15 @@ object Playground extends App {
     SolidSurface(Color(1,0,0,1)) +
 
       Bild (
-        PositionTransform(0.5, 0.5) +
+        PositionTransform(0.75, 0.4) +
+        RotationTransform(0, 0, 0.3) +
 
           Bild (
             SolidSurface(Color(0,1,1,1)) +
-              RectMask(0.02, 0.02) +
-              PositionTransform(EvoGen(_%30*0.04), EvoGen(x=>Math.floor(x/30)*0.04))
-            //PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +
-          ) * 500
+              RectMask(0.1, 0.1) +
+              PositionTransform(EvoGen(_%5*0.2), EvoGen(x=>Math.floor(x/5)*0.2)) +
+              RotationTransform(0, 0, 0.75)
+          ) * 25
 
       )
 

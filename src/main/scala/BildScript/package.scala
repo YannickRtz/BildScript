@@ -32,6 +32,11 @@ package object BildScript {
   trait Transformation extends Addable {
     def next: Transformation
     def exec(p: Point): Point
+    def execReverse(p: Point): Point
+  }
+
+  trait LocalTransform extends Transformation {
+    val pivotPoint: Point
   }
 
   trait Filling extends Addable {
