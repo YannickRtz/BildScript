@@ -32,11 +32,12 @@ object EvalTest extends App {
       println("Event kind:" + event.kind + ". File affected: " + event.context + ".")
       println("Compilation...")
       val allLines = Files.readAllLines(Paths.get("./src/main/scala/WatchMe/" + event.context))
-      val filtered = JavaConverters.asScalaBuffer(allLines).toList.filter { str =>
-        if (str.contains("package")) false
-        else if (str.contains("import")) true
-        else !str.contains("}") && !str.contains("{")
-      }
+      val filtered = JavaConverters.asScalaBuffer(allLines).toList.filterNot { str =>
+        str.trim.startsWith("package") ||
+        str.trim.startsWith("object") ||
+        str.trim.isEmpty
+      }.dropRight(1)
+      // drop last closing curly brace
       val str = filtered.mkString("\n")
       println("Starting sketch...")
       toolbox.eval(toolbox.parse(str))

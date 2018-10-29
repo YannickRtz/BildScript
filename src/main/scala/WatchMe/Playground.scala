@@ -13,23 +13,19 @@ object Playground extends App {
 
   println("Initialization...")
 
-  Bild (
-    SolidSurface(Color(1,0,0,1)) +
 
-      Bild (
-        PositionTransform(0.75, 0.4) +
-        RotationTransform(0, 0, 0.3) +
+  Bild {
+    SolidSurface(Color(0, 1, 1, 1)) +
 
-          Bild (
-            SolidSurface(Color(0,1,1,1)) +
-              RectMask(0.1, 0.1) +
-              PositionTransform(EvoGen(_%5*0.2), EvoGen(x=>Math.floor(x/5)*0.2)) +
-              RotationTransform(0, 0, 0.75)
-          ) * 25
+    Bild {
+      SolidSurface(Color(0, 1, 0, 1)) +
+      RectMask(0.2, 0.2) +
+      PositionTransform(EvoGen(_ % 30 * 0.4), 0.5)
+    } * 4
 
-      )
+  }
 
-  )
+
     .raster(Resolution(1000, 1000), 2)
     .output("image.png")
 

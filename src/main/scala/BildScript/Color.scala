@@ -1,6 +1,6 @@
 package BildScript
 
-case class Color(var red: Float, var green: Float, var blue: Float, var alpha: Float) {
+case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double) {
 
   // println("new color")
 
