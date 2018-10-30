@@ -76,12 +76,15 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       if (fillings.nonEmpty) {
         for (y <- minHeight until maxHeight) {
           for (x <- minWidth until maxWidth) {
-            // val afterTransform = applyTranformations(allTransformations, Point(x / pixelPerPoint,y / pixelPerPoint))
-            //if (allTransformations.size > 4)
-            //println("halt")
-            val withoutTransform = newTransformations.foldRight(Point(x / pixelPerPoint,y / pixelPerPoint))((transform, prev) => transform.execReverse(prev))
-            if (m.test(withoutTransform)) fillings.foreach { f =>
-              canvas.setRGB(x, y, f.trace(withoutTransform).toARGB)
+            val withoutTransform = newTransformations.foldRight(Point(x / pixelPerPoint,y / pixelPerPoint))((transform, prev) =>
+              transform.execReverse(prev))
+            if (m.test(withoutTransform)) {
+              val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
+              fillings.foreach { f =>
+                val fillingColor = f.trace(withoutTransform)
+                canvasColor.overlayMutate(fillingColor)
+              }
+              canvas.setRGB(x, y, canvasColor.toARGB)
             }
           }
         }
@@ -93,6 +96,12 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       case _ => Unit
     }
   }
+
+  // TODO: Applying list of transformations in extra function
+  // TODO: Support basic transparancy
+  // TODO: Support anti aliasing
+  // TODO: Support for transparent masks
+  // TODO: Support for generators in Color
 
   def add(a: Addable): Bild = a match {
     case m: Mask => new Bild(masks :+ m, fillings, transformations, bilder)

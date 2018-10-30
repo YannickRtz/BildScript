@@ -15,18 +15,15 @@ object Playground extends App {
 
 
   Bild {
-    SolidSurface(Color(0, 1, 1, 1)) +
-
+    SolidSurface(GColor(0, 1, 1)) +
     Bild {
-      SolidSurface(Color(0, 1, 0, 1)) +
+      SolidSurface(GColor(0, 1, 0, EvoGen(_ * 0.25, 1))) +
       RectMask(0.2, 0.2) +
       PositionTransform(EvoGen(_ % 30 * 0.4), 0.5)
     } * 4
-
   }
 
-
-    .raster(Resolution(1000, 1000), 2)
+    .raster(Resolution(500, 500), 2)
     .output("image.png")
 
 }

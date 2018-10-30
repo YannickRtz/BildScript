@@ -61,12 +61,19 @@ package object BildScript {
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
     // println("new fixed double gen")
-    override def nextGen: Gen[Double] = new FixedDoubleGen(number)
+    override def nextGen: Gen[Double] = this
     override def get: Double = number
   }
 
   implicit def genGet[A](r: Gen[A]): A = r.get
   implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
   implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
+
+  case class GColor(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double] = 1) {
+    def get: Color = Color(red, green, blue, alpha)
+    def next: GColor = GColor(red.nextGen, green.nextGen, blue.nextGen, alpha.nextGen)
+  }
+
+  implicit def colorToGColor(c: Color): GColor = GColor(c.red, c.green, c.blue, c.alpha)
 
 }

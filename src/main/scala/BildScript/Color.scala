@@ -1,6 +1,6 @@
 package BildScript
 
-case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double) {
+case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double = 1) {
 
   // println("new color")
 
@@ -13,21 +13,19 @@ case class Color(var red: Double, var green: Double, var blue: Double, var alpha
       Color(red * a1 + c.red * a,
         green * a1 + c.green * a,
         blue * a1 + c.blue * a,
-        Seq(alpha + a, 1).min)
+        Math.max(alpha + a, 1))
     }
   }
 
-  def overlayCopy(c: Color): Color = {
-    if (c.alpha == 0) this
-    else {
+  def overlayMutate(c: Color): Unit = {
+    if (c.alpha > 0) {
       val a = c.alpha
       val a1 = 1 - a
       // TODO: Correct alpha handling
       red = red * a1 + c.red * a
       green = green * a1 + c.green * a
       blue = blue * a1 + c.blue * a
-      alpha = Seq(alpha + a, 1).min
-      this
+      alpha = Math.max(alpha + a, 1)
     }
   }
 
@@ -48,4 +46,12 @@ case class Color(var red: Double, var green: Double, var blue: Double, var alpha
 object Color {
   def WHITE = new Color(1,1,1,1)
   def CLEAR = new Color(0, 0, 0, 0)
+
+  def fromARGB(a: Int): Color = {
+    val alpha = (a >> 24) / 255.0
+    val red = ((a & 0xFF0000) >> 16) / 255.0
+    val green = ((a & 0xFF00) >> 8) / 255.0
+    val blue = (a & 0xFF) / 255.0
+    Color(red, green, blue, alpha)
+  }
 }

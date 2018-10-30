@@ -2,14 +2,13 @@ package BildScript
 
 object Fillings {
 
-  case class SolidSurface(color: Color) extends Filling {
+  case class SolidSurface(gColor: GColor) extends Filling {
 
     // println("new filling")
 
-    // TODO: Enable random colors
-    override def next: SolidSurface = {
-      SolidSurface(color)
-    }
+    val color: Color = gColor.get
+
+    override def next: SolidSurface = SolidSurface(gColor.next)
     override def trace(p: Point): Color = color
 
   }

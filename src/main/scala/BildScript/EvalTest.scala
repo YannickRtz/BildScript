@@ -48,47 +48,4 @@ object EvalTest extends App {
 
   // https://stackoverflow.com/questions/1183645/eval-in-scala
 
-  // val toolbox = currentMirror.mkToolBox()
-
-  /*val as =
-    """
-      |import BildScript._
-      |import BildScript.Fillings.SolidSurface
-      |import BildScript.Generators.{CountGen, EvoGen}
-      |import BildScript.Masks.RectMask
-      |import BildScript.Transformations.PositionTransform
-      |
-      |import scala.language.{implicitConversions, postfixOps}
-      |
-      |object Playground extends App {
-      |
-      |val hey = "ho"
-      |
-      |  Bild (
-      |    SolidSurface(Color(0,1,1,1)) +
-      |
-      |    Bild (
-      |      PositionTransform(0, 0) +
-      |
-      |      Bild (
-      |        SolidSurface(Color(0,1,0,0.5f)) +
-      |        RectMask(0.2, 0.2) +
-      |        PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>Math.floor(x/7)*0.4))
-      |        //PositionTransform(EvoGen(_%7*0.4), EvoGen(x=>(x/7).floor*0.4)) +
-      |      ) * 4
-      |
-      |    ) * 3
-      |
-      |  )
-      |    .raster(Resolution(256, 512), 2)
-      |    .output("image.png")
-      |
-      |}
-    """.stripMargin
-
-  val compe = toolbox.eval(toolbox.parse(as))
-
-  println(compe.getClass)*/
-  //println(compe) // prints 10
-
 }
