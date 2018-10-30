@@ -1,11 +1,10 @@
 package WatchMe
 
-import BildScript._
 import BildScript.Fillings.SolidSurface
 import BildScript.Generators.EvoGen
 import BildScript.Masks.RectMask
-import BildScript.Transformations.{PositionTransform, RotationTransform}
-import BildScript.{Bild, Color, Resolution}
+import BildScript.Transformations.PositionTransform
+import BildScript.{Bild, Resolution, _}
 
 import scala.language.postfixOps
 
@@ -23,7 +22,8 @@ object Playground extends App {
     } * 4
   }
 
-    .raster(Resolution(500, 500), 2)
+
+    .raster(Resolution(400, 400), 2)
     .output("image.png")
 
 }

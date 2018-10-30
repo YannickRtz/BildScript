@@ -74,6 +74,7 @@ package object BildScript {
     def next: GColor = GColor(red.nextGen, green.nextGen, blue.nextGen, alpha.nextGen)
   }
 
-  implicit def colorToGColor(c: Color): GColor = GColor(c.red, c.green, c.blue, c.alpha)
+  // We don't implicitly convert GColors to prevent confusion in DSL Layer
+  // implicit def colorToGColor(c: Color): GColor = GColor(c.red, c.green, c.blue, c.alpha)
 
 }

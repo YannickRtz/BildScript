@@ -10,6 +10,8 @@ object Generators {
     override def get: Double = currentNumber
   }
 
+  // TODO: It's kind of hard to remember what these do, is there a smarter naming scheme?
+
   case class EvoGen(evoFunc: Int => Double, evoCount: Int = 0) extends Gen[Double] {
     // println("new evo gen")
     override def nextGen: Gen[Double] = EvoGen(evoFunc, evoCount + 1)
