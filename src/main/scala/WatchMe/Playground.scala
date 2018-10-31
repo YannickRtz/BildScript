@@ -10,9 +10,6 @@ import scala.language.postfixOps
 
 object Playground extends App {
 
-  println("Initialization...")
-
-
   Bild {
     SolidSurface(GColor("ffffff")) +
     Bild {
@@ -28,7 +25,6 @@ object Playground extends App {
       )
     } * 2500
   }
-
 
     .raster(Resolution(1000, 1000), 2)
     .output("image.png")

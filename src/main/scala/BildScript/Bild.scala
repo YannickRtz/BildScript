@@ -59,6 +59,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       if (masks.isEmpty) Seq(RectMask(canvas.getWidth / pixelPerPoint, canvas.getHeight / pixelPerPoint))
       else Seq()
     (defaultMask ++ masks).foreach { m =>
+      // Use bounding box:
       val topLeftBBPoint = newTransformations.foldLeft(Point(0,0))((prev, t) => t.exec(prev))
       val bottomRightBBPoint = newTransformations.foldLeft(m.boundingBoxDimensions)((prev, t) => t.exec(prev))
       val topRightBBPoint = newTransformations.foldLeft(Point(m.boundingBoxDimensions.x, 0))((prev, t) => t.exec(prev))
@@ -102,6 +103,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   // TODO: Support anti aliasing
   // TODO: Support for transparent masks
   // TODO: Support for generators in Color
+  // TODO: Add some kind of color palettes
 
   def add(a: Addable): Bild = a match {
     case m: Mask => new Bild(masks :+ m, fillings, transformations, bilder)
@@ -118,7 +120,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def raster(resolution: Resolution, width: Double): RasterImage = {
-    println("Rasterization...")
+    println("Rasterizing...")
     val result = RasterImage(resolution)
     result.draw(this, width)
     result

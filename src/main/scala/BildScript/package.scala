@@ -61,7 +61,8 @@ package object BildScript {
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
     // println("new fixed double gen")
-    override def nextGen: Gen[Double] = this
+    // TODO: Why does this not work correctly here?!
+    override def nextGen: Gen[Double] = new FixedDoubleGen(number)
     override def get: Double = number
   }
 
@@ -81,6 +82,7 @@ package object BildScript {
 
   object GColor {
     def apply(hex: String): GColor = {
+      require(hex.length == 6 || hex.length == 8)
       val red = Integer.parseInt(hex.slice(0, 2), 16)
       val green = Integer.parseInt(hex.slice(2, 4), 16)
       val blue = Integer.parseInt(hex.slice(4, 6), 16)
