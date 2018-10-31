@@ -69,9 +69,26 @@ package object BildScript {
   implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
   implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
 
-  case class GColor(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double] = 1) {
-    def get: Color = Color(red, green, blue, alpha)
+  case class GColor(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double] = 255) {
+    val get: Color = Color(
+      Math.max(0, Math.min(1, red / 255)),
+      Math.max(0, Math.min(1, green / 255)),
+      Math.max(0, Math.min(1, blue / 255)),
+      Math.max(0, Math.min(1, alpha / 255))
+    )
     def next: GColor = GColor(red.nextGen, green.nextGen, blue.nextGen, alpha.nextGen)
+  }
+
+  object GColor {
+    def apply(hex: String): GColor = {
+      val red = Integer.parseInt(hex.slice(0, 2), 16)
+      val green = Integer.parseInt(hex.slice(2, 4), 16)
+      val blue = Integer.parseInt(hex.slice(4, 6), 16)
+      val alpha =
+        if (hex.length >= 8) Integer.parseInt(hex.slice(6, 8), 16)
+        else 255
+      GColor(red, green, blue, alpha)
+    }
   }
 
   // We don't implicitly convert GColors to prevent confusion in DSL Layer
