@@ -12,16 +12,16 @@ object Transformations {
   case class RotationTransform(degree: Gen[Double], x: Gen[Double] = 0, y: Gen[Double] = 0) extends LocalTransform {
     // TODO: Either use x,y everywhere or Point() Format, but this is mixed...
     // TODO: Use degrees and maybe make radian an optional choice
+    val radian: Double = degree * (Math.PI / 180)
     override val pivotPoint: Point = Point(x, y)
     override def next: Transformation = RotationTransform(degree.nextGen, x.nextGen, y.nextGen)
-    override def exec(p: Point): Point = rotate(p, degree)
-    override def execReverse(p: Point): Point = rotate(p, -degree)
-    val radian: Double = degree * (Math.PI / 180)
+    override def exec(p: Point): Point = rotate(p, -1 * radian)
+    override def execReverse(p: Point): Point = rotate(p, radian)
 
-    def rotate(p: Point, degree: Double): Point =
+    def rotate(p: Point, r: Double): Point =
       Point(
-        p.x * Math.cos(radian) - p.y * Math.sin(radian),
-        p.x * Math.sin(radian) + p.y * Math.cos(radian)
+        p.x * Math.cos(r) - p.y * Math.sin(r),
+        p.x * Math.sin(r) + p.y * Math.cos(r)
       )
   }
 

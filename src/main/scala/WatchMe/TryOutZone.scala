@@ -13,21 +13,19 @@ object TryOutZone extends App {
 
   Bild {
     SolidSurface(GColor("111111")) +
-
     Bild {
-      RotationTransform(2, 0, 0) +
+      PositionTransform(0, 150) +
+      RotationTransform(45, 0, 0) +
       SolidSurface(GColor("abcdef")) +
       RectMask(40, 40) +
-      PositionTransform(30, 60) +
       PositionTransform(
         EvoGen(_ % 4 * 100),
         EvoGen(x => Math.floor(x / 4) * 100)
       ) +
-      RotationTransform(EvoGen(_ * 6), 20, 20) +
+      RotationTransform(EvoGen(_ * (360 / 15)), 20, 20) +
     } * (4 * 4)
-
   }
 
-    .raster(Resolution(300, 500), 400)
+    .raster(Resolution(500, 500), 500)
     .output("image.png")
 }

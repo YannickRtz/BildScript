@@ -44,8 +44,9 @@ case class Color(var red: Double, var green: Double, var blue: Double, var alpha
 }
 
 object Color {
-  def WHITE = new Color(1,1,1,1)
-  def CLEAR = new Color(0, 0, 0, 0)
+  def WHITE = Color(1, 1, 1)
+  def CLEAR = Color(0, 0, 0, 0)
+  def RED = Color(1, 0, 0)
 
   def fromARGB(a: Int): Color = {
     val alpha = (a >> 24) / 255.0

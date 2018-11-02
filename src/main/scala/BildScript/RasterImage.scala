@@ -8,6 +8,8 @@ import javax.imageio.ImageIO
 class RasterImage(imageWidth: Int, imageHeight: Int) {
   // println("new rasterimage")
 
+  // TODO: It does not seem like this class is still really needed
+
   val bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB)
 
   def trace(b: Bild, drawableWidth: Double): Unit = {
