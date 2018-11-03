@@ -11,7 +11,6 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
-  // println("new bild")
 
   def next: Bild = {
     val newMasks = masks.map(_.next)
@@ -35,10 +34,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
-    // TODO: Check if mutable buffers are really apropriate here
-    val allTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
-    allTransformations ++= prevTransformations ++= transformations
-
+    val allTransformations = prevTransformations ++ transformations
     if (fillings.nonEmpty) {
       val newTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
       val prevNonlocalTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
@@ -70,19 +66,18 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         val topRightBBPoint = Point(m.boundingBoxDimensions.x, 0).applyTransforms(newTransformations)
         val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions.y).applyTransforms(newTransformations)
         val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
-        val minWidth = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
-        val minHeight = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
-        val maxWidth = Math.min(canvas.getWidth, Math.round(BBPoints.maxBy(_.x).x * pixelPerPoint).toInt)
-        val maxHeight = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
-        // TODO : Rename these, get fitting names
+        val minX = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
+        val minY = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
+        val maxX = Math.min(canvas.getWidth, Math.round(BBPoints.maxBy(_.x).x * pixelPerPoint).toInt)
+        val maxY = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
         // To skip bounding box:
-        /*val maxWidth = canvas.getWidth
-        val maxHeight = canvas.getHeight
-        val minWidth = 0
-        val minHeight = 0*/
+        /*val maxX = canvas.getWidth
+        val maxY = canvas.getHeight
+        val minX = 0
+        val minY = 0*/
 
-        for (y <- minHeight until maxHeight) {
-          for (x <- minWidth until maxWidth) {
+        for (y <- minY until maxY) {
+          for (x <- minX until maxX) {
             val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
             if (m.test(withoutTransform)) {
               val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
@@ -110,7 +105,6 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   // TODO: Support anti aliasing
   // TODO: Support for transparent masks
   // TODO: Add some kind of color palettes
-  // TODO: Maybe move rendering logic to another place? Feels like this class has to many responsibilities
   // TODO: Think about a way to pass options like useBoundingBox, useAntiAliasing etc.
   // TODO: Check support for multiple fillings and multiple masks
 

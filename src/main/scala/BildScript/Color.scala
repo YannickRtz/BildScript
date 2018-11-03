@@ -2,8 +2,6 @@ package BildScript
 
 case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double = 1) {
 
-  // println("new color")
-
   def overlay(c: Color): Color = {
     if (c.alpha == 0) this
     else {

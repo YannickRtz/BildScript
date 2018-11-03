@@ -56,7 +56,6 @@ package object BildScript {
   }
 
   case class Point(x: Double, y: Double) {
-    // println("new point")
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
 
@@ -67,9 +66,7 @@ package object BildScript {
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
-    // println("new fixed double gen")
-    // TODO: Why does this not work correctly here?!
-    override def nextGen: Gen[Double] = new FixedDoubleGen(number)
+    override def nextGen: Gen[Double] = this
     override def get: Double = number
   }
 
