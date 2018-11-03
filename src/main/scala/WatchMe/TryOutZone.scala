@@ -3,7 +3,7 @@ import BildScript.Fillings.SolidSurface
 import BildScript.Generators.EvoGen
 import BildScript.Masks.RectMask
 import BildScript.Transformations.{PositionTransform, RotationTransform}
-import BildScript.{Bild, Resolution, _}
+import BildScript.{Bild, _}
 
 import scala.language.postfixOps
 object TryOutZone extends App {
@@ -18,8 +18,10 @@ object TryOutZone extends App {
 
   Bild {
     SolidSurface(GColor("111111")) +
-    Bild {
-      SolidSurface(GColor("aaffaa")) +
+    numRects * Bild {
+      SolidSurface(
+        GColor(EvoGen(_ * 1), EvoGen(_ * 0.4), 50)
+      ) +
       RectMask(rectWidth, rectWidth) +
       PositionTransform(
         EvoGen(_ * -1 * 0.002 * picWidth + centerOffset),
@@ -30,9 +32,8 @@ object TryOutZone extends App {
         EvoGen(_ * 0.002 * picWidth),
         EvoGen(_ * 0.002 * picWidth)
       ) +
-    } * numRects
+    }
   }
 
-    .raster(Resolution(picWidth * 2, picWidth * 2), picWidth + 100)
-    .output("image.png")
+    .raster(picWidth * 2, picWidth * 2, picWidth + 100, "image.png")
 }

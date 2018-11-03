@@ -4,7 +4,7 @@ import BildScript.Fillings.SolidSurface
 import BildScript.Generators.EvoGen
 import BildScript.Masks.RectMask
 import BildScript.Transformations.PositionTransform
-import BildScript.{Bild, Resolution, _}
+import BildScript.{Bild, _}
 
 import scala.language.postfixOps
 
@@ -26,7 +26,6 @@ object Playground extends App {
     } * 2500
   }
 
-    .raster(Resolution(1000, 1000), 2)
-    .output("image.png")
+    .raster(1000, 1000, 2, "image.png")
 
 }

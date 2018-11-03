@@ -14,7 +14,11 @@ package object BildScript {
     def + : Addable = this
   }
 
-  // TODO: Maybe make it that you can write multiplyer in front of the Bild object
+  class RichAddableInt(i: Int) {
+    def * (a: Addable): Seq[Addable] = Seq.range(1, i).scanLeft(a)((b, _) => b.next)
+  }
+
+  implicit def int2RichAddableInt(i: Int): RichAddableInt = new RichAddableInt(i)
 
   class RichAddableList(l: Seq[Addable]) {
     def + (a: Addable): Seq[Addable] = l :+ a
@@ -55,10 +59,11 @@ package object BildScript {
     // println("new point")
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
-  }
 
-  case class Resolution(x: Int, y: Int) {
-    // println("new resolution")
+    def applyTransforms(transformations: Seq[Transformation]): Point =
+      transformations.foldLeft(this)((prev, t) => t.exec(prev))
+    def applyTransformsReverse(transformations: Seq[Transformation]): Point =
+      transformations.foldRight(this)((t, prev) => t.execReverse(prev))
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {

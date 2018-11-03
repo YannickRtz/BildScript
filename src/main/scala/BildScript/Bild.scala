@@ -1,9 +1,11 @@
 package BildScript
 
 import java.awt.image.BufferedImage
+import java.io.File
 
 import BildScript.Masks.RectMask
 import BildScript.Transformations.PositionTransform
+import javax.imageio.ImageIO
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -18,16 +20,18 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
     new Bild(newMasks, newFillings, newTransformations, bilder)
   }
 
-  def trace(p: Point): Color = {
-    val afterTransform = transformations.foldRight(p)((transform, prev) => transform.execReverse(prev))
-    if (masks.nonEmpty && !masks.exists(_.test(afterTransform)))
-      Color.CLEAR
-    else {
-      val colorsBilder = bilder.map(_.trace(afterTransform))
-      val colorsFillings = fillings.map(_.trace(afterTransform))
-      val result = (colorsFillings ++ colorsBilder).foldLeft(Color.CLEAR)(_.overlay(_))
-      result
-    }
+  def add(a: Addable): Bild = a match {
+    case m: Mask => new Bild(masks :+ m, fillings, transformations, bilder)
+    case f: Filling => new Bild(masks, fillings :+ f, transformations, bilder)
+    case t: Transformation => new Bild(masks, fillings, transformations :+ t, bilder)
+    case b: Bild => new Bild(masks, fillings, transformations, bilder :+ b)
+  }
+
+  @tailrec
+  final def add(list: Seq[Addable]): Bild = {
+    if (list.isEmpty) this
+    else if (list.size < 2) add(list.head)
+    else add(list.head).add(list.tail)
   }
 
   def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
@@ -45,8 +49,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       newTransformations ++= allNonlocalTransformations
       allTransformations.reverse.foreach {
         case l: LocalTransform =>
-          val newPivot = prevNonlocalTransformations.foldRight(l.pivotPoint)((t, prev) => t.execReverse(prev))
-          val vector = allNonlocalTransformations.foldLeft(newPivot)((prev, t) => t.exec(prev))
+          val newPivot = l.pivotPoint.applyTransformsReverse(prevNonlocalTransformations)
+          val vector = newPivot.applyTransforms(allNonlocalTransformations)
           newTransformations += PositionTransform(-1 * vector.x, -1 * vector.y)
           newTransformations += l
           newTransformations += PositionTransform(vector.x, vector.y)
@@ -61,10 +65,10 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         else Seq()
       (defaultMask ++ masks).foreach { m =>
         // Use bounding box:
-        val topLeftBBPoint = newTransformations.foldLeft(Point(0,0))((prev, t) => t.exec(prev))
-        val bottomRightBBPoint = newTransformations.foldLeft(m.boundingBoxDimensions)((prev, t) => t.exec(prev))
-        val topRightBBPoint = newTransformations.foldLeft(Point(m.boundingBoxDimensions.x, 0))((prev, t) => t.exec(prev))
-        val bottomLeftBBPoint = newTransformations.foldLeft(Point(0, m.boundingBoxDimensions.y))((prev, t) => t.exec(prev))
+        val topLeftBBPoint = Point(0,0).applyTransforms(newTransformations)
+        val bottomRightBBPoint = m.boundingBoxDimensions.applyTransforms(newTransformations)
+        val topRightBBPoint = Point(m.boundingBoxDimensions.x, 0).applyTransforms(newTransformations)
+        val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions.y).applyTransforms(newTransformations)
         val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
         val minWidth = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
         val minHeight = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
@@ -79,8 +83,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
         for (y <- minHeight until maxHeight) {
           for (x <- minWidth until maxWidth) {
-            val withoutTransform = newTransformations.foldRight(Point(x / pixelPerPoint,y / pixelPerPoint))((transform, prev) =>
-              transform.execReverse(prev))
+            val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
             if (m.test(withoutTransform)) {
               val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
               fillings.foreach { f =>
@@ -103,42 +106,23 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
     }
   }
 
-  // TODO: Applying list of transformations in extra function
   // TODO: Support basic transparancy
   // TODO: Support anti aliasing
   // TODO: Support for transparent masks
-  // TODO: Support for generators in Color
   // TODO: Add some kind of color palettes
   // TODO: Maybe move rendering logic to another place? Feels like this class has to many responsibilities
   // TODO: Think about a way to pass options like useBoundingBox, useAntiAliasing etc.
+  // TODO: Check support for multiple fillings and multiple masks
 
-  def add(a: Addable): Bild = a match {
-    case m: Mask => new Bild(masks :+ m, fillings, transformations, bilder)
-    case f: Filling => new Bild(masks, fillings :+ f, transformations, bilder)
-    case t: Transformation => new Bild(masks, fillings, transformations :+ t, bilder)
-    case b: Bild => new Bild(masks, fillings, transformations, bilder :+ b)
-  }
-
-  @tailrec
-  final def add(list: Seq[Addable]): Bild = {
-    if (list.isEmpty) this
-    else if (list.size < 2) add(list.head)
-    else add(list.head).add(list.tail)
-  }
-
-  def raster(resolution: Resolution, width: Double): RasterImage = {
+  def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String): Unit = {
+    val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
+    val pixelPerPoint = resolutionX.toDouble / width
     println("Rasterizing...")
-    val result = RasterImage(resolution)
-    result.draw(this, width)
-    result
-  }
-
-  def raytrace(resolution: Resolution, width: Double): RasterImage = {
-    println("Ray tracing...")
-    // TODO: Raytracing probably needs to go...
-    val result = RasterImage(resolution)
-    result.trace(this, width)
-    result
+    draw(bufferedImage, pixelPerPoint, Seq())
+    println("File output...")
+    val outputfile = new File(fileName)
+    ImageIO.write(bufferedImage, "png", outputfile)
+    println("done")
   }
 
 }
