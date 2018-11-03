@@ -14,6 +14,8 @@ package object BildScript {
     def + : Addable = this
   }
 
+  // TODO: Maybe make it that you can write multiplyer in front of the Bild object
+
   class RichAddableList(l: Seq[Addable]) {
     def + (a: Addable): Seq[Addable] = l :+ a
     def + (x: Seq[Addable]): Seq[Addable] = l ++ x

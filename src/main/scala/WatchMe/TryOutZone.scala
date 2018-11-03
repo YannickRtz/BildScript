@@ -8,24 +8,31 @@ import BildScript.{Bild, Resolution, _}
 import scala.language.postfixOps
 object TryOutZone extends App {
 
-  // Rotation demonstration:
-
+  val rectWidth = 15
+  val picWidth = 500
+  val padding = 50
+  val numRects = 300
+  val halfRect = rectWidth / 2
+  val halfPic = picWidth / 2
+  val centerOffset = halfPic - halfRect + 50
 
   Bild {
     SolidSurface(GColor("111111")) +
     Bild {
-      PositionTransform(0, 150) +
-      RotationTransform(45, 0, 0) +
-      SolidSurface(GColor("abcdef")) +
-      RectMask(40, 40) +
+      SolidSurface(GColor("aaffaa")) +
+      RectMask(rectWidth, rectWidth) +
       PositionTransform(
-        EvoGen(_ % 4 * 100),
-        EvoGen(x => Math.floor(x / 4) * 100)
+        EvoGen(_ * -1 * 0.002 * picWidth + centerOffset),
+        EvoGen(_ * -1 * 0.002 * picWidth + centerOffset)
       ) +
-      RotationTransform(EvoGen(_ * (360 / 15)), 20, 20) +
-    } * (4 * 4)
+      RotationTransform(
+        EvoGen(_ * (360 / (numRects / 10))),
+        EvoGen(_ * 0.002 * picWidth),
+        EvoGen(_ * 0.002 * picWidth)
+      ) +
+    } * numRects
   }
 
-    .raster(Resolution(500, 500), 500)
+    .raster(Resolution(picWidth * 2, picWidth * 2), picWidth + 100)
     .output("image.png")
 }
