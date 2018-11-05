@@ -12,13 +12,13 @@ object Playground extends App {
 
   Canvas(1000, 1000, 3, "image.png") (
 
-    SolidSurface(GColor("222222")) +
+    SolidSurface(HEX("222222")) +
 
     Bild (
       PositionTransform(0.5, 0.3) +
 
       15 * Bild (
-        SolidSurface(GColor(
+        SolidSurface(RGBA256(
           EvoGen(255 / 15 * _),
           255,
           EvoGen(255 - 255 / 15 * _),
@@ -30,7 +30,7 @@ object Playground extends App {
         ) +
 
       15 * Bild (
-        SolidSurface(GColor(
+        SolidSurface(RGBA256(
           EvoGen(255 / 15 * _),
           EvoGen(255 - 255 / 15 * _),
           255, 35

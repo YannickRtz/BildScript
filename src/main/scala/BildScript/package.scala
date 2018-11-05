@@ -7,6 +7,11 @@ package object BildScript {
 
   type ARGB = Int
 
+  case class Canvas(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
+    def apply(l: Seq[Addable]): Unit = Bild(l).raster(resolutionX, resolutionY, width, fileName)
+    def apply(a: Addable): Unit = Bild(a).raster(resolutionX, resolutionY, width, fileName)
+  }
+
   trait Addable {
     def next: Addable
     def + (a: Addable): Seq[Addable] = Seq(this, a)
@@ -51,7 +56,7 @@ package object BildScript {
   }
 
   trait Gen[A] {
-    def nextGen: Gen[A]
+    def next: Gen[A]
     def get: A
   }
 
@@ -66,7 +71,7 @@ package object BildScript {
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
-    override def nextGen: Gen[Double] = this
+    override def next: Gen[Double] = this
     override def get: Double = number
   }
 
@@ -74,20 +79,53 @@ package object BildScript {
   implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
   implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
 
-  case class GColor(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double] = 255) {
-    val get: Color = Color(
-      Math.max(0, Math.min(1, red / 255.0)),
-      Math.max(0, Math.min(1, green / 255.0)),
-      Math.max(0, Math.min(1, blue / 255.0)),
-      Math.max(0, Math.min(1, alpha / 255.0))
-    )
-    def next: GColor = GColor(red.nextGen, green.nextGen, blue.nextGen, alpha.nextGen)
+  case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double]) extends Gen[Color] {
+    override def next: Gen[Color] = RGBA(red.next, green.next, blue.next, alpha.next)
+    override def get: Color = Color(red, green, blue, alpha)
   }
 
-  // TODO: Support HSL Color model
+  object RGB {
+    def apply(red: Gen[Double], green: Gen[Double], blue: Gen[Double]): RGBA =
+      RGBA(red, green, blue, 1)
+  }
 
-  object GColor {
-    def apply(hex: String): GColor = {
+  case class RGBA256(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double]) extends Gen[Color] {
+    def next: Gen[Color] = RGBA256(red.next, green.next, blue.next, alpha.next)
+    val get: Color = Color(red / 255.0, green / 255.0, blue / 255.0, alpha / 255.0)
+  }
+
+  object RGB256 {
+    def apply(red: Gen[Double], green: Gen[Double], blue: Gen[Double]): RGBA256 =
+      RGBA256(red, green, blue, 255)
+  }
+
+  case class HSVA(h: Gen[Double], s: Gen[Double], v: Gen[Double], a: Gen[Double]) extends Gen[Color] {
+    override def next: Gen[Color] = HSVA(h.next, s.next, v.next, a.next)
+    override def get: Color = {
+      // Algorithm from https://de.wikipedia.org/wiki/HSV-Farbraum
+      val hi = Math.floor(h / 60)
+      val f = h / 60 - hi
+      val p = v * (1 - s)
+      val q = v * (1 - s * f)
+      val t = v * (1 - s * (1 - f))
+      hi match {
+        case 1 => Color(q, v, p, a)
+        case 2 => Color(p, v, t, a)
+        case 3 => Color(p, q, v, a)
+        case 4 => Color(t, p, v, a)
+        case 5 => Color(v, p, q, a)
+        case _ => Color(v, t, p, a)
+      }
+    }
+  }
+
+  object HSV {
+    def apply(h: Gen[Double], s: Gen[Double], v: Gen[Double]): HSVA =
+      HSVA(h, s, v, 1)
+  }
+
+  object HEX {
+    def apply(hex: String): RGBA256 = {
       require(hex.length == 6 || hex.length == 8)
       val red = Integer.parseInt(hex.slice(0, 2), 16)
       val green = Integer.parseInt(hex.slice(2, 4), 16)
@@ -95,16 +133,8 @@ package object BildScript {
       val alpha =
         if (hex.length >= 8) Integer.parseInt(hex.slice(6, 8), 16)
         else 255
-      GColor(red, green, blue, alpha)
+      RGBA256(red, green, blue, alpha)
     }
-  }
-
-  // We don't implicitly convert GColors to prevent confusion in DSL Layer
-  // implicit def colorToGColor(c: Color): GColor = GColor(c.red, c.green, c.blue, c.alpha)
-
-  case class Canvas(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
-    def apply(l: Seq[Addable]): Unit = Bild(l).raster(resolutionX, resolutionY, width, fileName)
-    def apply(a: Addable): Unit = Bild(a).raster(resolutionX, resolutionY, width, fileName)
   }
 
 }

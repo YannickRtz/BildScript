@@ -9,7 +9,7 @@ object Masks {
 
     override val boundingBoxDimensions: Point = Point(width, height)
 
-    override def next: RectMask = RectMask(widthGen.nextGen, heightGen.nextGen)
+    override def next: RectMask = RectMask(widthGen.next, heightGen.next)
     override def test(p: Point): Boolean = {
       p.x < width && p.x > 0 && p.y < height && p.y > 0
     }

@@ -2,7 +2,7 @@ package BildScript
 
 object Fillings {
 
-  case class SolidSurface(gColor: GColor) extends Filling {
+  case class SolidSurface(gColor: Gen[Color]) extends Filling {
 
     val color: Color = gColor.get
 

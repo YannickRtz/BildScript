@@ -2,6 +2,11 @@ package BildScript
 
 case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double = 1) {
 
+  red = Math.max(0, Math.min(1, red))
+  green = Math.max(0, Math.min(1, green))
+  blue = Math.max(0, Math.min(1, blue))
+  alpha = Math.max(0, Math.min(1, alpha))
+
   def overlayMutate(c: Color): Unit = {
     // Algorithm from https://de.wikipedia.org/wiki/Alpha_Blending
     if (c.alpha > 0) {

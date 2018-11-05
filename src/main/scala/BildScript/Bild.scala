@@ -82,6 +82,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
             if (m.test(withoutTransform)) {
               val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
               fillings.foreach { f =>
+                // TODO: Should fillings know about the bounding box dimensions?
                 val fillingColor = f.trace(withoutTransform)
                 canvasColor.overlayMutate(fillingColor)
               }

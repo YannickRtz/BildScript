@@ -19,12 +19,12 @@ object TryOutZone extends App {
 
   Canvas(picWidth * 2, picWidth * 2, picWidth + 100, "image.png") (
 
-    SolidSurface(GColor("111111")) +
+    SolidSurface(HEX("111111")) +
 
     numRects * Bild (
 
       SolidSurface(
-        GColor(EvoGen(_ * 1), EvoGen(_ * 0.4), 50)
+        HSV(EvoGen(_ * (360 / (numRects / 10)) % 360), 1, 1)
       ) +
 
       RectMask(rectWidth, rectWidth) +
@@ -35,7 +35,7 @@ object TryOutZone extends App {
       ) +
 
       RotationTransform(
-        EvoGen(_ * (360 / (numRects / 10))),
+        EvoGen(_ * (360 / (numRects / 10)) % 360),
         EvoGen(_ * 0.002 * picWidth),
         EvoGen(_ * 0.002 * picWidth)
       )
