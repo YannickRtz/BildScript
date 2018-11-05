@@ -4,9 +4,6 @@ import scala.language.implicitConversions
 
 object Generators {
 
-  // TODO: Add support for generators on different levels
-  // TODO: Add support for random numbers
-
   case class StepGen(currentNumber: Double, stepFunc: Double => Double) extends Gen[Double] {
     override def next: Gen[Double] = StepGen(stepFunc(currentNumber), stepFunc)
     override def get: Double = currentNumber

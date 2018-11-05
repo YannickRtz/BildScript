@@ -2,7 +2,7 @@ package WatchMe
 import BildScript.Fillings.SolidSurface
 import BildScript.Generators.EvoGen
 import BildScript.Masks.RectMask
-import BildScript.Transformations.{PositionTransform, RotationTransform}
+import BildScript.Transformations.{Translation, Rotation}
 import BildScript.{Bild, _}
 
 import scala.language.postfixOps
@@ -29,12 +29,12 @@ object TryOutZone extends App {
 
       RectMask(rectWidth, rectWidth) +
 
-      PositionTransform(
+      Translation(
         EvoGen(_ * -1 * 0.002 * picWidth + centerOffset),
         EvoGen(_ * -1 * 0.002 * picWidth + centerOffset)
       ) +
 
-      RotationTransform(
+      Rotation(
         EvoGen(_ * (360 / (numRects / 10)) % 360),
         EvoGen(_ * 0.002 * picWidth),
         EvoGen(_ * 0.002 * picWidth)

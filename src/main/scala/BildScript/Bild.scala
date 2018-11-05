@@ -82,7 +82,6 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
             if (m.test(withoutTransform)) {
               val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
               fillings.foreach { f =>
-                // TODO: Should fillings know about the bounding box dimensions?
                 val fillingColor = f.trace(withoutTransform)
                 canvasColor.overlayMutate(fillingColor)
               }
@@ -101,13 +100,6 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       case _ => Unit
     }
   }
-
-  // TODO: Support basic transparancy
-  // TODO: Support anti aliasing
-  // TODO: Support for transparent masks
-  // TODO: Add some kind of color palettes
-  // TODO: Think about a way to pass options like useBoundingBox, useAntiAliasing etc.
-  // TODO: Check support for multiple fillings and multiple masks
 
   def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String): Unit = {
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
