@@ -6,6 +6,7 @@ import BildScript.Transformations.{PositionTransform, RotationTransform}
 import BildScript.{Bild, _}
 
 import scala.language.postfixOps
+
 object TryOutZone extends App {
 
   val rectWidth = 15
@@ -16,24 +17,29 @@ object TryOutZone extends App {
   val halfPic = picWidth / 2
   val centerOffset = halfPic - halfRect + 50
 
-  Bild {
+  Canvas(picWidth * 2, picWidth * 2, picWidth + 100, "image.png") (
+
     SolidSurface(GColor("111111")) +
-    numRects * Bild {
+
+    numRects * Bild (
+
       SolidSurface(
         GColor(EvoGen(_ * 1), EvoGen(_ * 0.4), 50)
       ) +
+
       RectMask(rectWidth, rectWidth) +
+
       PositionTransform(
         EvoGen(_ * -1 * 0.002 * picWidth + centerOffset),
         EvoGen(_ * -1 * 0.002 * picWidth + centerOffset)
       ) +
+
       RotationTransform(
         EvoGen(_ * (360 / (numRects / 10))),
         EvoGen(_ * 0.002 * picWidth),
         EvoGen(_ * 0.002 * picWidth)
-      ) +
-    }
-  }
+      )
+    )
+  )
 
-    .raster(picWidth * 2, picWidth * 2, picWidth + 100, "image.png")
 }

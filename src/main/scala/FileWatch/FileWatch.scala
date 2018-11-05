@@ -1,4 +1,4 @@
-package BildScript
+package FileWatch
 
 import java.io.File
 import java.nio.file.{Files, Paths}

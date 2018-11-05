@@ -102,4 +102,9 @@ package object BildScript {
   // We don't implicitly convert GColors to prevent confusion in DSL Layer
   // implicit def colorToGColor(c: Color): GColor = GColor(c.red, c.green, c.blue, c.alpha)
 
+  case class Canvas(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
+    def apply(l: Seq[Addable]): Unit = Bild(l).raster(resolutionX, resolutionY, width, fileName)
+    def apply(a: Addable): Unit = Bild(a).raster(resolutionX, resolutionY, width, fileName)
+  }
+
 }
