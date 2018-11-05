@@ -76,13 +76,15 @@ package object BildScript {
 
   case class GColor(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double] = 255) {
     val get: Color = Color(
-      Math.max(0, Math.min(1, red / 255)),
-      Math.max(0, Math.min(1, green / 255)),
-      Math.max(0, Math.min(1, blue / 255)),
-      Math.max(0, Math.min(1, alpha / 255))
+      Math.max(0, Math.min(1, red / 255.0)),
+      Math.max(0, Math.min(1, green / 255.0)),
+      Math.max(0, Math.min(1, blue / 255.0)),
+      Math.max(0, Math.min(1, alpha / 255.0))
     )
     def next: GColor = GColor(red.nextGen, green.nextGen, blue.nextGen, alpha.nextGen)
   }
+
+  // TODO: Support HSL Color model
 
   object GColor {
     def apply(hex: String): GColor = {

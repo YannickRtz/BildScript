@@ -2,28 +2,16 @@ package BildScript
 
 case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double = 1) {
 
-  def overlay(c: Color): Color = {
-    if (c.alpha == 0) this
-    else {
-      val a = c.alpha
-      val a1 = 1 - a
-      // TODO: Correct alpha handling
-      Color(red * a1 + c.red * a,
-        green * a1 + c.green * a,
-        blue * a1 + c.blue * a,
-        Math.max(alpha + a, 1))
-    }
-  }
-
   def overlayMutate(c: Color): Unit = {
+    // Algorithm from https://de.wikipedia.org/wiki/Alpha_Blending
     if (c.alpha > 0) {
       val a = c.alpha
       val a1 = 1 - a
-      // TODO: Correct alpha handling
-      red = red * a1 + c.red * a
-      green = green * a1 + c.green * a
-      blue = blue * a1 + c.blue * a
-      alpha = Math.max(alpha + a, 1)
+      alpha = a + a1 * alpha  // mutation!
+      val a2 = 1 / alpha
+      red = a2 * (a * c.red + a1 * alpha * red)
+      green = a2 * (a * c.green + a1 * alpha * green)
+      blue = a2 * (a * c.blue + a1 * alpha * blue)
     }
   }
 
@@ -47,9 +35,9 @@ object Color {
   def RED = Color(1, 0, 0)
 
   def fromARGB(a: Int): Color = {
-    val alpha = (a >> 24) / 255.0
-    val red = ((a & 0xFF0000) >> 16) / 255.0
-    val green = ((a & 0xFF00) >> 8) / 255.0
+    val alpha = ((a >> 24) & 0xFF) / 255.0
+    val red = ((a >> 16) & 0xFF) / 255.0
+    val green = ((a >> 8) & 0xFF) / 255.0
     val blue = (a & 0xFF) / 255.0
     Color(red, green, blue, alpha)
   }
