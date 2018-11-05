@@ -10,7 +10,7 @@ import scala.language.postfixOps
 
 object Playground extends App {
 
-  Canvas(1000, 1000, 3, "image.png") (
+  BildScript(1000, 1000, 3, "image.png") (
 
     SolidSurface(HEX("222222")) +
 

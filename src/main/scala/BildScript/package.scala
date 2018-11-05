@@ -7,7 +7,7 @@ package object BildScript {
 
   type ARGB = Int
 
-  case class Canvas(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
+  case class BildScript(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
     def apply(l: Seq[Addable]): Unit = Bild(l).raster(resolutionX, resolutionY, width, fileName)
     def apply(a: Addable): Unit = Bild(a).raster(resolutionX, resolutionY, width, fileName)
   }
