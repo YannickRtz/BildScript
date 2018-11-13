@@ -1,4 +1,4 @@
-package BildScript
+package BildPackage
 
 object Transformations {
 

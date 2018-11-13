@@ -1,10 +1,10 @@
-package BildScript
+package BildPackage
 
 import java.awt.image.BufferedImage
 import java.io.File
 
-import BildScript.Masks.RectMask
-import BildScript.Transformations.PositionTransform
+import BildPackage.Masks.RectMask
+import BildPackage.Transformations.Translation
 import javax.imageio.ImageIO
 
 import scala.annotation.tailrec
@@ -47,9 +47,9 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         case l: LocalTransform =>
           val newPivot = l.pivotPoint.applyTransformsReverse(prevNonlocalTransformations)
           val vector = newPivot.applyTransforms(allNonlocalTransformations)
-          newTransformations += PositionTransform(-1 * vector.x, -1 * vector.y)
+          newTransformations += Translation(-1 * vector.x, -1 * vector.y)
           newTransformations += l
-          newTransformations += PositionTransform(vector.x, vector.y)
+          newTransformations += Translation(vector.x, vector.y)
 
         case t: Transformation =>
           prevNonlocalTransformations += t

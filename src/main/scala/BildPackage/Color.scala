@@ -1,4 +1,4 @@
-package BildScript
+package BildPackage
 
 case class Color(var red: Double, var green: Double, var blue: Double, var alpha: Double = 1) {
 

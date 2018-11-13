@@ -1,10 +1,10 @@
 package WatchMe
 
-import BildScript.Fillings.SolidSurface
-import BildScript.Generators.EvoGen
-import BildScript.Masks.RectMask
-import BildScript.Transformations.{Translation, Rotation}
-import BildScript._
+import BildPackage.Fillings.SolidSurface
+import BildPackage.Generators.EvoGen
+import BildPackage.Masks.RectMask
+import BildPackage.Transformations.{Translation, Rotation}
+import BildPackage._
 
 import scala.language.postfixOps
 
@@ -43,17 +43,3 @@ object Playground extends App {
   )
 
 }
-
-// TODO: Should fillings know about the bounding box dimensions?
-// TODO: Support basic transparancy
-// TODO: Support anti aliasing
-// TODO: Support for transparent masks
-// TODO: Add some kind of color palettes
-// TODO: Think about a way to pass options like useBoundingBox, useAntiAliasing etc.
-// TODO: Support for multiple fillings and multiple masks
-// TODO: Support for masking Bild objects (probably requires extra bufferedImage)
-// TODO: Add Scale Tansformation
-// TODO: Add Shear Transformation
-// TODO: Add Reflection Transformation
-// TODO: Add support for generators on different levels
-// TODO: Add support for random numbers

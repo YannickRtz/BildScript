@@ -1,9 +1,9 @@
 package WatchMe
-import BildScript.Fillings.SolidSurface
-import BildScript.Generators.EvoGen
-import BildScript.Masks.RectMask
-import BildScript.Transformations.{Translation, Rotation}
-import BildScript.{Bild, _}
+import BildPackage.Fillings.SolidSurface
+import BildPackage.Generators.EvoGen
+import BildPackage.Masks.RectMask
+import BildPackage.Transformations.{Translation, Rotation}
+import BildPackage.{Bild, _}
 
 import scala.language.postfixOps
 

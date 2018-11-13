@@ -31,7 +31,7 @@ object FileWatch extends App {
         println("Preparing code...")
         val allLines = Files.readAllLines(Paths.get(event.context.toString))
         val filtered = JavaConverters.asScalaBuffer(allLines).toList.filterNot { str =>
-          str.trim.startsWith("package") || str.trim.isEmpty
+          str.trim.startsWith("BildPackage") || str.trim.isEmpty
         }.dropRight(1) // drop last closing curly brace
         val patched = filtered.updated(
           filtered.indexWhere(_.trim.startsWith("object")),

@@ -3,7 +3,7 @@ import java.awt.image.BufferedImage
 
 import scala.language.implicitConversions
 
-package object BildScript {
+package object BildPackage {
 
   type ARGB = Int
 
