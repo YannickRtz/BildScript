@@ -4,14 +4,14 @@ object Masks {
 
   case class RectMask(widthGen: Gen[Double], heightGen: Gen[Double]) extends Mask {
 
-    val width: Double = widthGen.get
-    val height: Double = heightGen.get
+    // val width: Double = widthGen.get
+    // val height: Double = heightGen.get
 
-    override val boundingBoxDimensions: Point = Point(width, height)
+    override def boundingBoxDimensions(tc: Seq[Int]): Point = Point(widthGen.get(tc), heightGen.get(tc))
 
     override def next: RectMask = RectMask(widthGen.next, heightGen.next)
-    override def test(p: Point): Boolean = {
-      p.x < width && p.x > 0 && p.y < height && p.y > 0
+    override def test(p: Point, tc: Seq[Int]): Boolean = {
+      p.x < widthGen.get(tc) && p.x > 0 && p.y < heightGen.get(tc) && p.y > 0
     }
   }
 

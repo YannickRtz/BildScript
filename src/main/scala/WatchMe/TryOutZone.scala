@@ -17,7 +17,12 @@ object TryOutZone extends App {
   val halfPic = picWidth / 2
   val centerOffset = halfPic - halfRect + 50
 
-  BildScript(picWidth * 2, picWidth * 2, picWidth + 100, "image.png") (
+  BildScript(
+    resolutionX = picWidth * 2,
+    resolutionY = picWidth * 2,
+    width = picWidth + 100,
+    fileName = "image.png"
+  )(
 
     SolidSurface(HEX("111111")) +
 

@@ -4,10 +4,10 @@ object Fillings {
 
   case class SolidSurface(gColor: Gen[Color]) extends Filling {
 
-    val color: Color = gColor.get
+    // val color: Color = gColor.get
 
     override def next: SolidSurface = SolidSurface(gColor.next)
-    override def trace(p: Point): Color = color
+    override def trace(p: Point, tc: Seq[Int]): Color = gColor.get(tc)
 
   }
 

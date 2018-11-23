@@ -1,6 +1,4 @@
 
-import java.awt.image.BufferedImage
-
 import scala.language.implicitConversions
 
 package object BildPackage {
@@ -35,53 +33,56 @@ package object BildPackage {
   implicit def addable2RichAddableList(a: Addable): RichAddableList = new RichAddableList(Seq(a))
 
   trait Mask extends Addable {
-    val boundingBoxDimensions: Point
+    def boundingBoxDimensions(tc: Seq[Int]): Point
     def next: Mask
-    def test(p: Point): Boolean
+    def test(p: Point, tc: Seq[Int]): Boolean
   }
 
   trait Transformation extends Addable {
     def next: Transformation
-    def exec(p: Point): Point
-    def execReverse(p: Point): Point
+    def exec(p: Point, tc: Seq[Int]): Point
+    def execReverse(p: Point, tc: Seq[Int]): Point
   }
 
   trait LocalTransform extends Transformation {
-    val pivotPoint: Point
+    def pivotPoint(tc: Seq[Int]): Point
   }
 
   trait Filling extends Addable {
     def next: Filling
-    def trace(p: Point): Color
+    def trace(p: Point, tc: Seq[Int]): Color
   }
 
   trait Gen[A] {
+    val level: Int
     def next: Gen[A]
-    def get: A
+    def get(treeCoordinates: Seq[Int]): A
   }
 
   case class Point(x: Double, y: Double) {
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
 
-    def applyTransforms(transformations: Seq[Transformation]): Point =
-      transformations.foldLeft(this)((prev, t) => t.exec(prev))
-    def applyTransformsReverse(transformations: Seq[Transformation]): Point =
-      transformations.foldRight(this)((t, prev) => t.execReverse(prev))
+    def applyTransforms(transformations: Seq[Transformation], tc: Seq[Int]): Point =
+      transformations.foldLeft(this)((prev, t) => t.exec(prev, tc))
+    def applyTransformsReverse(transformations: Seq[Transformation], tc: Seq[Int]): Point =
+      transformations.foldRight(this)((t, prev) => t.execReverse(prev, tc))
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
+    val level = 0
     override def next: Gen[Double] = this
-    override def get: Double = number
+    override def get(treeCoordinates: Seq[Int]): Double = number
   }
 
-  implicit def genGet[A](r: Gen[A]): A = r.get
+  // TODO: Reactivate this implicit conversion but with treecoordinates?
+  // implicit def genGet[A](r: Gen[A]): A = r.get
   implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
   implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
 
-  case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double]) extends Gen[Color] {
+  case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], level: Int = 0) extends Gen[Color] {
     override def next: Gen[Color] = RGBA(red.next, green.next, blue.next, alpha.next)
-    override def get: Color = Color(red, green, blue, alpha)
+    override def get(tc: Seq[Int]): Color = Color(red.get(tc), green.get(tc), blue.get(tc), alpha.get(tc))
   }
 
   object RGB {
@@ -89,9 +90,14 @@ package object BildPackage {
       RGBA(red, green, blue, 1)
   }
 
-  case class RGBA256(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double]) extends Gen[Color] {
+  case class RGBA256(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], level: Int = 0) extends Gen[Color] {
     def next: Gen[Color] = RGBA256(red.next, green.next, blue.next, alpha.next)
-    val get: Color = Color(red / 255.0, green / 255.0, blue / 255.0, alpha / 255.0)
+    def get(tc: Seq[Int]): Color = Color(
+      red.get(tc) / 255.0,
+      green.get(tc) / 255.0,
+      blue.get(tc) / 255.0,
+      alpha.get(tc) / 255.0
+    )
   }
 
   object RGB256 {
@@ -99,10 +105,14 @@ package object BildPackage {
       RGBA256(red, green, blue, 255)
   }
 
-  case class HSVA(h: Gen[Double], s: Gen[Double], v: Gen[Double], a: Gen[Double]) extends Gen[Color] {
-    override def next: Gen[Color] = HSVA(h.next, s.next, v.next, a.next)
-    override def get: Color = {
+  case class HSVA(hg: Gen[Double], sg: Gen[Double], vg: Gen[Double], ag: Gen[Double], level: Int = 0) extends Gen[Color] {
+    override def next: Gen[Color] = HSVA(hg.next, sg.next, vg.next, ag.next)
+    override def get(tc: Seq[Int]): Color = {
       // Algorithm from https://de.wikipedia.org/wiki/HSV-Farbraum
+      val h = hg.get(tc)
+      val s = sg.get(tc)
+      val v = vg.get(tc)
+      val a = ag.get(tc)
       val hi = Math.floor(h / 60)
       val f = h / 60 - hi
       val p = v * (1 - s)
