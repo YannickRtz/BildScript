@@ -15,22 +15,21 @@ object Playground extends App {
     width = 100,
     fileName = "image.png"
   )(
-
     SolidSurface(HEX("222222")) +
-
     Bild (
-      Translation(6, 6) +
-
-      9 * Bild (
-        9 * Bild (
-          SolidSurface(RGB256(
-            EvoGen(28 * _, Levels(1)),
-            100,
-            EvoGen(28 * _, Levels(0))
-          )) +
-          RectMask(5, 5) +
-          Translation(EvoGen(_ * 10), EvoGen(_ * 10, Levels(1))) +
-          Rotation(EvoGen((x,y) => x + y * 5, Levels(0, 1)))
+      Translation(25, 30) +
+      3 * Bild (
+        3 * Bild (
+          3 * Bild (
+            RectMask(2.5, 2.5) +
+            SolidSurface(
+              HSV(190, 0.9, EvoGen(1 - _ * (1f / 3), Levels(2)))
+            ) +
+            Translation(
+              EvoGen(_ * 20 + _ * 4, Levels(0, 2)),
+              EvoGen(_ * 20 - _ * 4, Levels(1, 2))
+            )
+          )
         )
       )
     )
