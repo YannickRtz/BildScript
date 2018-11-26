@@ -12,12 +12,25 @@ import scala.collection.mutable
 
 class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transformation], bilder: Seq[Bild]) extends Addable {
 
-  def next: Bild = {
+  override def next: Bild = {
     val newMasks = masks.map(_.next)
     val newTransformations = transformations.map(_.next)
     val newFillings = fillings.map(_.next)
     val newBilder = bilder.map(_.next)
     new Bild(newMasks, newFillings, newTransformations, newBilder)
+  }
+
+  override def walk(tc: Seq[Int]): Unit = {
+    masks.foreach(_.walk(tc))
+    fillings.foreach(_.walk(tc))
+    transformations.foreach(_.walk(tc))
+    val newTC: mutable.Buffer[Int] = mutable.Buffer()
+    tc.copyToBuffer(newTC)
+    newTC += 0
+    bilder.foreach { b: Bild =>
+      b.walk(newTC)
+      newTC.update(newTC.length - 1, newTC.last + 1)
+    }
   }
 
   def add(a: Addable): Bild = a match {
@@ -34,7 +47,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
     else add(list.head).add(list.tail)
   }
 
-  def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation], tc: Seq[Int]): Unit = {
+  def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
     val allTransformations = prevTransformations ++ transformations
     if (fillings.nonEmpty) {
       val newTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
@@ -46,8 +59,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       newTransformations ++= allNonlocalTransformations
       allTransformations.reverse.foreach {
         case l: LocalTransform =>
-          val newPivot = l.pivotPoint(tc).applyTransformsReverse(prevNonlocalTransformations, tc)
-          val vector = newPivot.applyTransforms(allNonlocalTransformations, tc)
+          val newPivot = l.pivotPoint.applyTransformsReverse(prevNonlocalTransformations)
+          val vector = newPivot.applyTransforms(allNonlocalTransformations)
           newTransformations += Translation(-1 * vector.x, -1 * vector.y)
           newTransformations += l
           newTransformations += Translation(vector.x, vector.y)
@@ -62,10 +75,10 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         else Seq()
       (defaultMask ++ masks).foreach { m =>
         // Use bounding box:
-        val topLeftBBPoint = Point(0,0).applyTransforms(newTransformations, tc)
-        val bottomRightBBPoint = m.boundingBoxDimensions(tc).applyTransforms(newTransformations, tc)
-        val topRightBBPoint = Point(m.boundingBoxDimensions(tc).x, 0).applyTransforms(newTransformations, tc)
-        val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions(tc).y).applyTransforms(newTransformations, tc)
+        val topLeftBBPoint = Point(0,0).applyTransforms(newTransformations)
+        val bottomRightBBPoint = m.boundingBoxDimensions.applyTransforms(newTransformations)
+        val topRightBBPoint = Point(m.boundingBoxDimensions.x, 0).applyTransforms(newTransformations)
+        val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions.y).applyTransforms(newTransformations)
         val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
         val minX = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
         val minY = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
@@ -79,11 +92,11 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
         for (y <- minY until maxY) {
           for (x <- minX until maxX) {
-            val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations, tc)
-            if (m.test(withoutTransform, tc)) {
+            val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
+            if (m.test(withoutTransform)) {
               val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
               fillings.foreach { f =>
-                val fillingColor = f.trace(withoutTransform, tc)
+                val fillingColor = f.trace(withoutTransform)
                 canvasColor.overlayMutate(fillingColor)
               }
               canvas.setRGB(x, y, canvasColor.toARGB)
@@ -96,21 +109,15 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       }
     }
 
-    val newTC: mutable.Buffer[Int] = mutable.Buffer()
-    tc.copyToBuffer(newTC)
-    newTC += 0
-    bilder.foreach { b: Bild =>
-      println(newTC + "NEXT")
-      b.draw(canvas, pixelPerPoint, allTransformations, newTC)
-      newTC.update(newTC.length - 1, newTC.last + 1)
-    }
+    bilder.foreach(_.draw(canvas, pixelPerPoint, allTransformations))
   }
 
   def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String): Unit = {
+    walk(Seq(0))
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
     val pixelPerPoint = resolutionX.toDouble / width
     println("Rasterizing...")
-    draw(bufferedImage, pixelPerPoint, Seq(), Seq(0))
+    draw(bufferedImage, pixelPerPoint, Seq())
     println("File output...")
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)

@@ -12,6 +12,7 @@ package object BildPackage {
 
   trait Addable {
     def next: Addable
+    def walk(treeCoordinates: Seq[Int]): Unit
     def + (a: Addable): Seq[Addable] = Seq(this, a)
     def * (n: Int): Seq[Addable] = Seq.range(1, n).scanLeft(this)((a, _) => a.next)
     def + : Addable = this
@@ -33,56 +34,78 @@ package object BildPackage {
   implicit def addable2RichAddableList(a: Addable): RichAddableList = new RichAddableList(Seq(a))
 
   trait Mask extends Addable {
-    def boundingBoxDimensions(tc: Seq[Int]): Point
+    val boundingBoxDimensions: Point
     def next: Mask
-    def test(p: Point, tc: Seq[Int]): Boolean
+    def test(p: Point): Boolean
   }
 
   trait Transformation extends Addable {
     def next: Transformation
-    def exec(p: Point, tc: Seq[Int]): Point
-    def execReverse(p: Point, tc: Seq[Int]): Point
+    def exec(p: Point): Point
+    def execReverse(p: Point): Point
   }
 
   trait LocalTransform extends Transformation {
-    def pivotPoint(tc: Seq[Int]): Point
+    val pivotPoint: Point
   }
 
   trait Filling extends Addable {
     def next: Filling
-    def trace(p: Point, tc: Seq[Int]): Color
+    def trace(p: Point): Color
   }
 
   trait Gen[A] {
-    val level: Int
+    val levels: Levels
     def next: Gen[A]
-    def get(treeCoordinates: Seq[Int]): A
+    def generate(treeCoordinates: Seq[Int]): A
+    var valueOption: Option[A] = None
+    def walk(treeCoordinates: Seq[Int]): Unit = {
+      valueOption = Option(generate(treeCoordinates))
+    }
+    def get: A = valueOption.get
   }
 
   case class Point(x: Double, y: Double) {
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
 
-    def applyTransforms(transformations: Seq[Transformation], tc: Seq[Int]): Point =
-      transformations.foldLeft(this)((prev, t) => t.exec(prev, tc))
-    def applyTransformsReverse(transformations: Seq[Transformation], tc: Seq[Int]): Point =
-      transformations.foldRight(this)((t, prev) => t.execReverse(prev, tc))
+    def applyTransforms(transformations: Seq[Transformation]): Point =
+      transformations.foldLeft(this)((prev, t) => t.exec(prev))
+    def applyTransformsReverse(transformations: Seq[Transformation]): Point =
+      transformations.foldRight(this)((t, prev) => t.execReverse(prev))
   }
 
   class FixedDoubleGen(number: Double) extends Gen[Double] {
-    val level = 0
+    override val levels = Levels(0)
+    override def get: Double = number
     override def next: Gen[Double] = this
-    override def get(treeCoordinates: Seq[Int]): Double = number
+    override def generate(tc: Seq[Int]): Double = number
   }
 
-  // TODO: Reactivate this implicit conversion but with treecoordinates?
-  // implicit def genGet[A](r: Gen[A]): A = r.get
+  implicit def genGet[A](r: Gen[A]): A = r.get
   implicit def number2FixedIntGen(n: Int): Gen[Double] = new FixedDoubleGen(n)
   implicit def number2FixedDoubleGen(n: Double): Gen[Double] = new FixedDoubleGen(n)
 
-  case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], level: Int = 0) extends Gen[Color] {
+  case class Levels(list: Int*) {
+    def apply(i: Int): Int = list(i)
+  }
+
+  /**
+    * From here: Color Utility Classes and Objects
+    **/
+
+  case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], levels: Levels = Levels(0)) extends Gen[Color] {
     override def next: Gen[Color] = RGBA(red.next, green.next, blue.next, alpha.next)
-    override def get(tc: Seq[Int]): Color = Color(red.get(tc), green.get(tc), blue.get(tc), alpha.get(tc))
+    override def walk(tc: Seq[Int]): Unit = {
+      red.walk(tc)
+      green.walk(tc)
+      blue.walk(tc)
+      alpha.walk(tc)
+      valueOption = Option(generate(tc))
+    }
+    override def generate(tc: Seq[Int]): Color = {
+      Color(red, green, blue, alpha)
+    }
   }
 
   object RGB {
@@ -90,13 +113,21 @@ package object BildPackage {
       RGBA(red, green, blue, 1)
   }
 
-  case class RGBA256(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], level: Int = 0) extends Gen[Color] {
+  case class RGBA256(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double],
+                     levels: Levels = Levels(0)) extends Gen[Color] {
     def next: Gen[Color] = RGBA256(red.next, green.next, blue.next, alpha.next)
-    def get(tc: Seq[Int]): Color = Color(
-      red.get(tc) / 255.0,
-      green.get(tc) / 255.0,
-      blue.get(tc) / 255.0,
-      alpha.get(tc) / 255.0
+    override def walk(tc: Seq[Int]): Unit = {
+      red.walk(tc)
+      green.walk(tc)
+      blue.walk(tc)
+      alpha.walk(tc)
+      valueOption = Option(generate(tc))
+    }
+    def generate(tc: Seq[Int]): Color = Color(
+      red / 255.0,
+      green / 255.0,
+      blue / 255.0,
+      alpha / 255.0
     )
   }
 
@@ -105,14 +136,18 @@ package object BildPackage {
       RGBA256(red, green, blue, 255)
   }
 
-  case class HSVA(hg: Gen[Double], sg: Gen[Double], vg: Gen[Double], ag: Gen[Double], level: Int = 0) extends Gen[Color] {
-    override def next: Gen[Color] = HSVA(hg.next, sg.next, vg.next, ag.next)
-    override def get(tc: Seq[Int]): Color = {
+  case class HSVA(h: Gen[Double], s: Gen[Double], v: Gen[Double], a: Gen[Double],
+                  levels: Levels = Levels(0)) extends Gen[Color] {
+    override def next: Gen[Color] = HSVA(h.next, s.next, v.next, a.next)
+    override def walk(tc: Seq[Int]): Unit = {
+      h.walk(tc)
+      s.walk(tc)
+      v.walk(tc)
+      a.walk(tc)
+      valueOption = Option(generate(tc))
+    }
+    override def generate(tc: Seq[Int]): Color = {
       // Algorithm from https://de.wikipedia.org/wiki/HSV-Farbraum
-      val h = hg.get(tc)
-      val s = sg.get(tc)
-      val v = vg.get(tc)
-      val a = ag.get(tc)
       val hi = Math.floor(h / 60)
       val f = h / 60 - hi
       val p = v * (1 - s)

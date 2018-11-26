@@ -3,12 +3,9 @@ package BildPackage
 object Fillings {
 
   case class SolidSurface(gColor: Gen[Color]) extends Filling {
-
-    // val color: Color = gColor.get
-
     override def next: SolidSurface = SolidSurface(gColor.next)
-    override def trace(p: Point, tc: Seq[Int]): Color = gColor.get(tc)
-
+    override def trace(p: Point): Color = gColor.get
+    override def walk(tc: Seq[Int]): Unit = gColor.walk(tc)
   }
 
 }

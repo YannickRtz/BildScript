@@ -31,7 +31,7 @@ object Playground extends App {
           )) +
           RectMask(1, 1) +
           Translation(EvoGen(_ * 0.075), EvoGen(_ * 0.1)) +
-          Translation(0, EvoGen(_ * 1, 1)) +
+          Translation(0, EvoGen(_ * 1, Levels(1))) +
           Rotation(EvoGen(_ * 5 - 25), 0.5, 0.5)
         )
       )

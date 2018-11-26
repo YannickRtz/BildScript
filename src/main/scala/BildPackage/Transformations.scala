@@ -3,18 +3,26 @@ package BildPackage
 object Transformations {
 
   case class Translation(x: Gen[Double], y: Gen[Double]) extends Transformation {
-    // val vector = Point(x, y)
     override def next: Transformation = Translation(x.next, y.next)
-    override def exec(p: Point, tc: Seq[Int]): Point = Point(p.x + x.get(tc), p.y + y.get(tc))
-    override def execReverse(p: Point, tc: Seq[Int]): Point = Point(p.x - x.get(tc), p.y - y.get(tc))
+    override def walk(tc: Seq[Int]): Unit = {
+      x.walk(tc)
+      y.walk(tc)
+    }
+    override def exec(p: Point): Point = Point(p.x + x, p.y + y)
+    override def execReverse(p: Point): Point = Point(p.x - x, p.y - y)
   }
 
   case class Rotation(degree: Gen[Double], x: Gen[Double] = 0, y: Gen[Double] = 0) extends LocalTransform {
-    def radian(tc: Seq[Int]): Double = degree.get(tc) * (Math.PI / 180)
-    override def pivotPoint(tc: Seq[Int]): Point = Point(x.get(tc), y.get(tc))
+    lazy val radian: Double = degree * (Math.PI / 180)
+    override lazy val pivotPoint: Point = Point(x, y)
     override def next: Transformation = Rotation(degree.next, x.next, y.next)
-    override def exec(p: Point, tc: Seq[Int]): Point = rotate(p, -1 * radian(tc))
-    override def execReverse(p: Point, tc: Seq[Int]): Point = rotate(p, radian(tc))
+    override def walk(tc: Seq[Int]): Unit = {
+      degree.walk(tc)
+      x.walk(tc)
+      y.walk(tc)
+    }
+    override def exec(p: Point): Point = rotate(p, -1 * radian)
+    override def execReverse(p: Point): Point = rotate(p, radian)
 
     def rotate(p: Point, r: Double): Point =
       Point(
