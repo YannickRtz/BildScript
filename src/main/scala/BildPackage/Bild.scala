@@ -113,6 +113,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String): Unit = {
+    println("Executing walk...")
     walk(Seq(0))
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
     val pixelPerPoint = resolutionX.toDouble / width
