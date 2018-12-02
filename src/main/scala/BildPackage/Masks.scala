@@ -14,4 +14,20 @@ object Masks {
     }
   }
 
+  object RectMask {
+    def apply(widthGen: Gen[Double]): RectMask = {
+      RectMask(widthGen, widthGen.next)
+    }
+  }
+
+  case class CircMask(radius: Gen[Double]) extends Mask {
+    override lazy val boundingBoxDimensions: Point = Point(radius * 2, radius * 2)
+    override def walk(tc: Seq[ARGB]): Unit = radius.walk(tc)
+    override def next: CircMask = CircMask(radius.next)
+    override def test(p: Point): Boolean = {
+      val distanceVector = Point(p.x - radius, p.y - radius)
+      distanceVector.length < radius
+    }
+  }
+
 }

@@ -1,39 +1,38 @@
 package WatchMe
-import BildPackage.Fillings.SolidSurface
-import BildPackage.Generators.EvoGen
-import BildPackage.Masks.RectMask
-import BildPackage.Transformations.{Translation, Rotation}
+import BildPackage.Fillings._
+import BildPackage.Generators._
+import BildPackage.Masks._
+import BildPackage.Transformations._
 import BildPackage._
 
 import scala.language.postfixOps
 
 object Playground extends App {
 
+  val numCircles = 27
+
   BildScript(
-    resolutionX = 500,
-    resolutionY = 500,
+    resolutionX = 1000,
+    resolutionY = 1000,
     width = 100,
     fileName = "image.png"
   )(
-    SolidSurface(HEX("222222")) +
+    SolidSurface(HEX("333333")) +
     Bild (
-      Translation(25, 30) +
-      3 * Bild (
-        3 * Bild (
-          3 * Bild (
-            RectMask(2.5, 2.5) +
-            SolidSurface(
-              HSV(190, 0.9, EvoGen(1 - _ * (1f / 3), Levels(2)))
-            ) +
-            Translation(
-              EvoGen(_ * 20 + _ * 4, Levels(0, 2)),
-              EvoGen(_ * 20 - _ * 4, Levels(1, 2))
-            )
-          )
+      Translation(10, 10) +
+      numCircles * Bild (
+        CircMask(EvoGen(40 - 1.5 * _)) +
+        SolidSurface(HSV(
+          EvoGen(x=> (200 + x * 9) % 360),
+          0.7,
+          EvoGen(_ * (1f / 20))
+        )) +
+        Translation(
+          EvoGen(_ * 1),
+          EvoGen(_ * 0.7)
         )
       )
     )
-
   )
 
 }

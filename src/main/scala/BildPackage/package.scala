@@ -66,6 +66,8 @@ package object BildPackage {
   }
 
   case class Point(x: Double, y: Double) {
+    lazy val length: Double = Math.sqrt(x * x + y * y)
+
     def + (p2: Point) = Point(x + p2.x, y + p2.y)
     def - (p2: Point) = Point(x - p2.x, y - p2.y)
 
@@ -148,11 +150,13 @@ package object BildPackage {
     }
     override def generate(tc: Seq[Int]): Color = {
       // Algorithm from https://de.wikipedia.org/wiki/HSV-Farbraum
+      val vClean = Math.max(0, Math.min(1, v))
+      // TODO: Clean more variables or define out of bound behavior
       val hi = Math.floor(h / 60)
       val f = h / 60 - hi
-      val p = v * (1 - s)
-      val q = v * (1 - s * f)
-      val t = v * (1 - s * (1 - f))
+      val p = vClean * (1 - s)
+      val q = vClean * (1 - s * f)
+      val t = vClean * (1 - s * (1 - f))
       hi match {
         case 1 => Color(q, v, p, a)
         case 2 => Color(p, v, t, a)
