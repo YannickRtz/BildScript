@@ -15,5 +15,6 @@ object ToDos {
   // TODO: Add Reflection Transformation
   // TODO: Add support for generators on different levels
   // TODO: Add support for random numbers
+  // TODO: Shorter name für Evogen and maybe try out implicit evogen?
 
 }

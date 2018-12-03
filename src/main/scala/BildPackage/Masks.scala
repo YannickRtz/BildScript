@@ -21,6 +21,7 @@ object Masks {
   }
 
   case class CircMask(radius: Gen[Double]) extends Mask {
+    // TODO: Input should probably be diameter
     override lazy val boundingBoxDimensions: Point = Point(radius * 2, radius * 2)
     override def walk(tc: Seq[ARGB]): Unit = radius.walk(tc)
     override def next: CircMask = CircMask(radius.next)

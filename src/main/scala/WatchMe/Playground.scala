@@ -9,24 +9,20 @@ import scala.language.postfixOps
 
 object Playground extends App {
 
-  val numCircles = 27
-
   BildScript(
-    resolutionX = 1000,
-    resolutionY = 1000,
-    width = 100,
+    resolutionX = 500,
+    resolutionY = 500,
+    width = 130,
     fileName = "image.png"
   )(
-    SolidSurface(HEX("333333")) +
-    Bild (
-      Translation(10, 10) +
-      numCircles * Bild (
-        CircMask(EvoGen(40 - 1.5 * _)) +
-        SolidSurface(HSV(
-          EvoGen(x=> (200 + x * 9) % 360),
-          0.7,
-          EvoGen(_ * (1f / 20))
-        )) +
+    SolidSurface(HEX("222222")) +
+    8 * Bild (
+      Translation(25, 25) +
+      Rotation(EvoGen(_ * -45), 40, 40) +
+      Translation(10, 15) +
+      27 * Bild (
+        CircMask(EvoGen(1 * _)) +
+        SolidSurface(HSVA(300, 0.4, 1, 0.1)) +
         Translation(
           EvoGen(_ * 1),
           EvoGen(_ * 0.7)
