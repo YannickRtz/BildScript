@@ -10,23 +10,21 @@ import scala.language.postfixOps
 object Playground extends App {
 
   BildScript(
-    resolutionX = 500,
-    resolutionY = 500,
+    resolutionX = 1000,
+    resolutionY = 1000,
     width = 130,
+
+
     fileName = "image.png"
   )(
     SolidSurface(HEX("222222")) +
-    8 * Bild (
-      Translation(25, 25) +
-      Rotation(EvoGen(_ * -45), 40, 40) +
-      Translation(10, 15) +
+    7 * Bild (
+      Translation(FromIndex(-30 + Math.sin(_) * 10), FromIndex(20 * _)) +
       27 * Bild (
-        CircMask(EvoGen(1 * _)) +
-        SolidSurface(HSVA(300, 0.4, 1, 0.1)) +
-        Translation(
-          EvoGen(_ * 1),
-          EvoGen(_ * 0.7)
-        )
+        Rotation(45) +
+        CircMask(FromIndex(x=> Math.sin(x * 3 % 10 * 0.1) * 20)) +
+        SolidSurface(HSVA(FromIndex(_ * 290 % 360), 0.5, 1, 0.7)) +
+        Translation(FromIndex(_ * 4), FromIndex(_ * 4))
       )
     )
   )

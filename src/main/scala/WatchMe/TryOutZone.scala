@@ -1,6 +1,6 @@
 package WatchMe
 import BildPackage.Fillings.SolidSurface
-import BildPackage.Generators.EvoGen
+import BildPackage.Generators.FromIndex
 import BildPackage.Masks.RectMask
 import BildPackage.Transformations.{Translation, Rotation}
 import BildPackage.{Bild, _}
@@ -29,20 +29,20 @@ object TryOutZone extends App {
     numRects * Bild (
 
       SolidSurface(
-        HSV(EvoGen(_ * (360 / (numRects / 10)) % 360), 1, 1)
+        HSV(FromIndex(_ * (360 / (numRects / 10)) % 360), 1, 1)
       ) +
 
       RectMask(rectWidth, rectWidth) +
 
       Translation(
-        EvoGen(_ * -1 * 0.002 * picWidth + centerOffset),
-        EvoGen(_ * -1 * 0.002 * picWidth + centerOffset)
+        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset),
+        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset)
       ) +
 
       Rotation(
-        EvoGen(_ * (360 / (numRects / 10)) % 360),
-        EvoGen(_ * 0.002 * picWidth),
-        EvoGen(_ * 0.002 * picWidth)
+        FromIndex(_ * (360 / (numRects / 10)) % 360),
+        FromIndex(_ * 0.002 * picWidth),
+        FromIndex(_ * 0.002 * picWidth)
       )
     )
   )

@@ -92,21 +92,59 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
         for (y <- minY until maxY) {
           for (x <- minX until maxX) {
-            val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
-            if (m.test(withoutTransform)) {
-              val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
-              fillings.foreach { f =>
-                val fillingColor = f.trace(withoutTransform)
-                canvasColor.overlayMutate(fillingColor)
+            val doAntiAliasing = true // TODO: Move to configuration
+            if (doAntiAliasing) {
+              val subPixelColors = for (d <- Bild.subPixelDeltas) yield {
+                val withoutTransform = Point((x + d.x) / pixelPerPoint, (y + d.y) / pixelPerPoint)
+                  .applyTransformsReverse(newTransformations)
+                if (m.test(withoutTransform)) {
+                  val subColor = Color.CLEAR
+                  fillings.foreach { f =>
+                    val fillingColor = f.trace(withoutTransform)
+                    subColor.overlayMutate(fillingColor)
+                  }
+                  subColor
+                } else {
+                  Color.CLEAR
+                }
               }
-              canvas.setRGB(x, y, canvasColor.toARGB)
-            } else {
-              // Debug visualization of bounding boxes:
-              // canvas.setRGB(x, y, Color.RED.toARGB)
+              val averageColor = averageColors(subPixelColors)
+              val finalColor = Color.fromARGB(canvas.getRGB(x, y))
+              finalColor.overlayMutate(averageColor)
+              canvas.setRGB(x, y, finalColor.toARGB)
+
+            } else {  // No anti aliasing:
+
+              val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
+              if (m.test(withoutTransform)) {
+                val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
+                fillings.foreach { f =>
+                  val fillingColor = f.trace(withoutTransform)
+                  canvasColor.overlayMutate(fillingColor)
+                }
+                canvas.setRGB(x, y, canvasColor.toARGB)
+              } else {
+                // Debug visualization of bounding boxes:
+                // canvas.setRGB(x, y, Color.RED.toARGB)
+              }
             }
           }
         }
       }
+    }
+
+    def averageColors(colors: Seq[Color]): Color = {
+      var redSum = 0.0
+      var greenSum = 0.0
+      var blueSum = 0.0
+      var alphaSum = 0.0
+      colors.foreach(c => {
+        redSum += c.red * c.alpha
+        greenSum += c.green * c.alpha
+        blueSum += c.blue * c.alpha
+        alphaSum += c.alpha
+      })
+      Color(redSum / alphaSum, greenSum / alphaSum, blueSum / alphaSum, alphaSum / colors.length)
     }
 
     bilder.foreach(_.draw(canvas, pixelPerPoint, allTransformations))
@@ -128,6 +166,9 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 }
 
 object Bild {
+  val subPixelDeltas = Seq(
+    Point(-0.3, -0.3), Point(0.3, -0.3), Point(-0.3, 0.3), Point(0.3, 0.3)
+  )
   def apply(): Bild = new Bild(Seq(), Seq(), Seq(), Seq())
   def apply(l: Seq[Addable]): Bild = apply().add(l)
   def apply(a: Addable): Bild = apply().add(a)
