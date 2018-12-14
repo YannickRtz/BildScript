@@ -12,11 +12,13 @@ case class Color(var red: Double, var green: Double, var blue: Double, var alpha
     if (c.alpha > 0) {
       val a = c.alpha
       val a1 = 1 - a
-      alpha = a + a1 * alpha  // mutation!
-      val a2 = 1 / alpha
+      val alphaNew = a + a1 * alpha
+      val a2 = 1 / alphaNew
       red = a2 * (a * c.red + a1 * alpha * red)
       green = a2 * (a * c.green + a1 * alpha * green)
       blue = a2 * (a * c.blue + a1 * alpha * blue)
+      alpha = alphaNew
+      assert(alpha <= 1 && red <= 1 && green <= 1 && blue <= 1)
     }
   }
 

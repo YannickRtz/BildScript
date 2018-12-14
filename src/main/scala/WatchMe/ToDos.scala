@@ -16,5 +16,6 @@ object ToDos {
   // TODO: Add support for random numbers (seeded random and unseeded random)
   // TODO: Fix first row and first column
   // TODO: Add a way to measure and display rendering times
+  // TODO: Compare different delta values for anti-aliasing
 
 }

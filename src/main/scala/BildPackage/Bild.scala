@@ -144,7 +144,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         blueSum += c.blue * c.alpha
         alphaSum += c.alpha
       })
-      Color(redSum / alphaSum, greenSum / alphaSum, blueSum / alphaSum, alphaSum / colors.length)
+      if (alphaSum == 0) Color.CLEAR
+      else Color(redSum / alphaSum, greenSum / alphaSum, blueSum / alphaSum, alphaSum / colors.length)
     }
 
     bilder.foreach(_.draw(canvas, pixelPerPoint, allTransformations))
