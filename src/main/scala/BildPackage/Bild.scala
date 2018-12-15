@@ -47,7 +47,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
     else add(list.head).add(list.tail)
   }
 
-  def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation]): Unit = {
+  def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation],
+           doAntiAliasing: Boolean, useBBox: Boolean, visualizeBBox: Boolean): Unit = {
     val allTransformations = prevTransformations ++ transformations
     if (fillings.nonEmpty) {
       val newTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
@@ -74,25 +75,27 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         if (masks.isEmpty) Seq(RectMask(canvas.getWidth / pixelPerPoint, canvas.getHeight / pixelPerPoint))
         else Seq()
       (defaultMask ++ masks).foreach { m =>
-        // Use bounding box:
-        val topLeftBBPoint = Point(0,0).applyTransforms(newTransformations)
-        val bottomRightBBPoint = m.boundingBoxDimensions.applyTransforms(newTransformations)
-        val topRightBBPoint = Point(m.boundingBoxDimensions.x, 0).applyTransforms(newTransformations)
-        val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions.y).applyTransforms(newTransformations)
-        val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
-        val minX = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
-        val minY = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
-        val maxX = Math.min(canvas.getWidth, Math.round(BBPoints.maxBy(_.x).x * pixelPerPoint).toInt)
-        val maxY = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
-        // To skip bounding box:
-        /*val maxX = canvas.getWidth
-        val maxY = canvas.getHeight
-        val minX = 0
-        val minY = 0*/
+        // Values for when we're not using the bounding box:
+        var maxX = canvas.getWidth
+        var maxY = canvas.getHeight
+        var minX = 0
+        var minY = 0
+
+        if (useBBox) {
+          val topLeftBBPoint = Point(0,0).applyTransforms(newTransformations)
+          val bottomRightBBPoint = m.boundingBoxDimensions.applyTransforms(newTransformations)
+          val topRightBBPoint = Point(m.boundingBoxDimensions.x, 0).applyTransforms(newTransformations)
+          val bottomLeftBBPoint = Point(0, m.boundingBoxDimensions.y).applyTransforms(newTransformations)
+          val BBPoints = Seq(topLeftBBPoint, bottomRightBBPoint, topRightBBPoint, bottomLeftBBPoint)
+          // Mutation!
+          minX = Math.max(0, Math.round(BBPoints.minBy(_.x).x * pixelPerPoint).toInt)
+          minY = Math.max(0, Math.round(BBPoints.minBy(_.y).y * pixelPerPoint).toInt)
+          maxX = Math.min(canvas.getWidth, Math.round(BBPoints.maxBy(_.x).x * pixelPerPoint).toInt)
+          maxY = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
+        }
 
         for (y <- minY until maxY) {
           for (x <- minX until maxX) {
-            val doAntiAliasing = true // TODO: Move to configuration
             if (doAntiAliasing) {
               val subPixelColors = for (d <- Bild.subPixelDeltas) yield {
                 val withoutTransform = Point((x + d.x) / pixelPerPoint, (y + d.y) / pixelPerPoint)
@@ -105,7 +108,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
                   }
                   subColor
                 } else {
-                  Color.CLEAR
+                  if (visualizeBBox) Color.RED
+                  else Color.CLEAR  // TODO: Optimize by filtering these?
                 }
               }
               val averageColor = averageColors(subPixelColors)
@@ -124,8 +128,8 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
                 }
                 canvas.setRGB(x, y, canvasColor.toARGB)
               } else {
-                // Debug visualization of bounding boxes:
-                // canvas.setRGB(x, y, Color.RED.toARGB)
+                if (visualizeBBox)
+                  canvas.setRGB(x, y, Color.RED.toARGB)
               }
             }
           }
@@ -148,16 +152,17 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       else Color(redSum / alphaSum, greenSum / alphaSum, blueSum / alphaSum, alphaSum / colors.length)
     }
 
-    bilder.foreach(_.draw(canvas, pixelPerPoint, allTransformations))
+    bilder.foreach(_.draw(canvas, pixelPerPoint, allTransformations, doAntiAliasing, useBBox, visualizeBBox))
   }
 
-  def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String): Unit = {
+  def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String, doAntiAliasing: Boolean,
+             useBBox: Boolean, visualizeBBox: Boolean): Unit = {
     println("Executing walk...")
     walk(Seq(0))
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
     val pixelPerPoint = resolutionX.toDouble / width
     println("Rasterizing...")
-    draw(bufferedImage, pixelPerPoint, Seq())
+    draw(bufferedImage, pixelPerPoint, Seq(), doAntiAliasing, useBBox, visualizeBBox)
     println("File output...")
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)

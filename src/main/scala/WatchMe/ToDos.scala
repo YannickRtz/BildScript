@@ -4,10 +4,8 @@ object ToDos {
 
   // TODO: Should fillings know about the bounding box dimensions?
   // TODO: Add gradient filling
-  // TODO: Support anti aliasing
   // TODO: Support for transparent masks
   // TODO: Add some notion of color palettes
-  // TODO: Options useBoundingBox and useAntiAliasing
   // TODO: Support for multiple fillings and multiple masks
   // TODO: Support for masking Bild objects (probably requires extra bufferedImage)
   // TODO: Add Scale Tansformation
@@ -17,5 +15,6 @@ object ToDos {
   // TODO: Fix first row and first column
   // TODO: Add a way to measure and display rendering times
   // TODO: Compare different delta values for anti-aliasing
+  // TODO: Introduce a way to render series of images for animations
 
 }

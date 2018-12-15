@@ -5,9 +5,12 @@ package object BildPackage {
 
   type ARGB = Int
 
-  case class BildScript(resolutionX: Int, resolutionY: Int, width: Double, fileName: String) {
-    def apply(l: Seq[Addable]): Unit = Bild(l).raster(resolutionX, resolutionY, width, fileName)
-    def apply(a: Addable): Unit = Bild(a).raster(resolutionX, resolutionY, width, fileName)
+  case class BildScript(resolutionX: Int, resolutionY: Int, width: Double, fileName: String,
+                        doAntiAliasing: Boolean = true, useBoundingBox: Boolean = true,
+                        visualizeBBox: Boolean = false) {
+    def apply(l: Seq[Addable]): Unit =
+      Bild(l).raster(resolutionX, resolutionY, width, fileName, doAntiAliasing, useBoundingBox, visualizeBBox)
+    def apply(a: Addable): Unit = apply(Seq(a))
   }
 
   trait Addable {
