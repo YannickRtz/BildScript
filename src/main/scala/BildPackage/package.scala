@@ -172,7 +172,7 @@ package object BildPackage {
   }
 
   object HSV {
-    def apply(h: Gen[Double], s: Gen[Double], v: Gen[Double]): HSVA =
+    def apply(h: Gen[Double], s: Gen[Double], v: Gen[Double], levels: Levels = Levels(0)): HSVA =
       HSVA(h, s, v, 1)
   }
 

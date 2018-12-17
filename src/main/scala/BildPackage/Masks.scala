@@ -15,9 +15,7 @@ object Masks {
   }
 
   object RectMask {
-    def apply(widthGen: Gen[Double]): RectMask = {
-      RectMask(widthGen, widthGen.next)
-    }
+    def apply(widthGen: Gen[Double]): RectMask = RectMask(widthGen, widthGen.next)
   }
 
   case class CircMask(radius: Gen[Double]) extends Mask {

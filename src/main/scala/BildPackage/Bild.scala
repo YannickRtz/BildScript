@@ -94,31 +94,35 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
           maxY = Math.min(canvas.getHeight, Math.round(BBPoints.maxBy(_.y).y * pixelPerPoint).toInt)
         }
 
-        for (y <- minY until maxY) {
-          for (x <- minX until maxX) {
-            if (doAntiAliasing) {
+        if (doAntiAliasing) {
+          for (y <- minY until maxY) {
+            for (x <- minX until maxX) {
+              val originalColor = Color.fromARGB(canvas.getRGB(x, y))
               val subPixelColors = for (d <- Bild.subPixelDeltas) yield {
                 val withoutTransform = Point((x + d.x) / pixelPerPoint, (y + d.y) / pixelPerPoint)
                   .applyTransformsReverse(newTransformations)
                 if (m.test(withoutTransform)) {
-                  val subColor = Color.CLEAR
+                  val subColor = originalColor.copy()
                   fillings.foreach { f =>
                     val fillingColor = f.trace(withoutTransform)
-                    subColor.overlayMutate(fillingColor)
+                    subColor.overlayMutate(fillingColor)  // TODO: Check if mutable color are really faster
                   }
                   subColor
                 } else {
                   if (visualizeBBox) Color.RED
-                  else Color.CLEAR  // TODO: Optimize by filtering these?
+                  else Color.CLEAR
                 }
               }
               val averageColor = averageColors(subPixelColors)
-              val finalColor = Color.fromARGB(canvas.getRGB(x, y))
-              finalColor.overlayMutate(averageColor)
-              canvas.setRGB(x, y, finalColor.toARGB)
+              originalColor.overlayMutate(averageColor)
+              canvas.setRGB(x, y, originalColor.toARGB)
+            }
+          }
 
-            } else {  // No anti aliasing:
+        } else {  // No anti aliasing:
 
+          for (y <- minY until maxY) {
+            for (x <- minX until maxX) {
               val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
               if (m.test(withoutTransform)) {
                 val canvasColor = Color.fromARGB(canvas.getRGB(x, y))

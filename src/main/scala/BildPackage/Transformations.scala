@@ -31,4 +31,22 @@ object Transformations {
       )
   }
 
+  case class Scale(xScale: Gen[Double], yScale: Gen[Double], xPivot: Gen[Double] = 0,
+                   yPivot: Gen[Double] = 0) extends LocalTransform {
+    override val pivotPoint: Point = Point(xPivot, yPivot)
+    override def next: Transformation = Scale(xScale.next, yScale.next, xPivot.next, yPivot.next)
+    override def walk(tc: Seq[ARGB]): Unit = {
+      xScale.walk(tc)
+      yScale.walk(tc)
+      xPivot.walk(tc)
+      yPivot.walk(tc)
+    }
+    override def exec(p: Point): Point = Point(p.x * xScale, p.y * yScale)
+    override def execReverse(p: Point): Point = Point(p.x / xScale, p.y / yScale)
+  }
+
+  object Scale {
+    def apply(scaleFactor: Gen[Double]): Scale = Scale(scaleFactor, scaleFactor.next)
+  }
+
 }

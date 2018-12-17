@@ -12,19 +12,28 @@ object Playground extends App {
   BildScript(
     resolutionX = 1000,
     resolutionY = 1000,
-    width = 130,
-
-
-    fileName = "image.png"
+    width = 100,
+    fileName = "image.png",
+    doAntiAliasing = true
   )(
     SolidSurface(HEX("222222")) +
-    7 * Bild (
-      Translation(FromIndex(-30 + Math.sin(_) * 10), FromIndex(20 * _)) +
-      27 * Bild (
-        Rotation(45) +
-        CircMask(FromIndex(x=> Math.sin(x * 3 % 10 * 0.1) * 20)) +
-        SolidSurface(HSVA(FromIndex(_ * 290 % 360), 0.5, 1, 0.7)) +
-        Translation(FromIndex(_ * 4), FromIndex(_ * 4))
+    32 * Bild (
+      Translation(30, 35) +
+      Scale(FromIndex(x=> 0.4 * (5 - x * 0.13)),
+        FromIndex(x=> 0.4 * (5 - x * 0.13)), 20, 25) +
+      2 * Bild (
+        SolidSurface(
+          HSV(FromIndex(_ * 43 % 111, Levels(1)), 0.8, 1)
+        ) +
+        CircMask(8) +
+        Translation(FromIndex(_ * 25), 0)
+      ) +
+      Bild (
+        SolidSurface(
+          HSV(FromIndex(_ * 43 % 111, Levels(1)), 0.8, 1)
+        ) +
+        CircMask(14) +
+        Translation(6, 10)
       )
     )
   )
