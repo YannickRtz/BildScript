@@ -16,24 +16,29 @@ object Playground extends App {
     fileName = "image.png",
     doAntiAliasing = true
   )(
-    SolidSurface(HEX("222222")) +
-    32 * Bild (
-      Translation(30, 35) +
-      Scale(FromIndex(x=> 0.4 * (5 - x * 0.13)),
-        FromIndex(x=> 0.4 * (5 - x * 0.13)), 20, 25) +
-      2 * Bild (
-        SolidSurface(
-          HSV(FromIndex(_ * 43 % 111, Levels(1)), 0.8, 1)
-        ) +
-        CircMask(8) +
-        Translation(FromIndex(_ * 25), 0)
-      ) +
-      Bild (
-        SolidSurface(
-          HSV(FromIndex(_ * 43 % 111, Levels(1)), 0.8, 1)
-        ) +
-        CircMask(14) +
-        Translation(6, 10)
+    SolidSurface(HEX("111111")) +
+    1000 * Bild (
+      Translation(SimpleRnd(_ * 100 - 5), SimpleRnd(_ * 100)) +
+      4 * Bild (
+        Scale(SimpleRnd(
+          x=> Math.abs(x * 0.17),
+          gaussian = true, Levels(1),
+          parentSeed = 123
+        )) +
+        Scale(
+          FromIndex(x=> (1+x)%2*0.14+0.5),
+          FromIndex(x=> (1+x)%2*0.14+0.5),
+          11, 0) +
+        Rotation(FromIndex(_ * 45), 10.65, 0) +
+        Scale(0.15, 1, 10, 10) +
+        SolidSurface(HSVA(
+          SimpleRnd(_ * 50 + 10, levels = Levels(1)),
+          0.5, 1,
+          SimpleRnd(x=> Math.abs(x * 0.13),
+            gaussian = true, Levels(1),
+            parentSeed = 123))) +
+        RectMask(20) +
+        Rotation(45)
       )
     )
   )

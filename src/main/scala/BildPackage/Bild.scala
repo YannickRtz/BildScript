@@ -60,6 +60,7 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
       newTransformations ++= allNonlocalTransformations
       allTransformations.reverse.foreach {
         case l: LocalTransform =>
+          // TODO: Check if possible: First localTransformations, then non local
           val newPivot = l.pivotPoint.applyTransformsReverse(prevNonlocalTransformations)
           val vector = newPivot.applyTransforms(allNonlocalTransformations)
           newTransformations += Translation(-1 * vector.x, -1 * vector.y)
@@ -160,9 +161,10 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
   }
 
   def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String, doAntiAliasing: Boolean,
-             useBBox: Boolean, visualizeBBox: Boolean): Unit = {
+             useBBox: Boolean, visualizeBBox: Boolean, randomSeed: Int): Unit = {
     println("Executing walk...")
-    walk(Seq(0))
+    walk(Seq(randomSeed, 0, 0))
+    // The first element is the seed, the second is the animation frame, the third is the first level
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
     val pixelPerPoint = resolutionX.toDouble / width
     println("Rasterizing...")

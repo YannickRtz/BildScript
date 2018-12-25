@@ -1,11 +1,12 @@
 package WatchMe
 import BildPackage.Fillings.SolidSurface
-import BildPackage.Generators.FromIndex
+import BildPackage.Generators.{FromIndex, SimpleRnd}
 import BildPackage.Masks.RectMask
-import BildPackage.Transformations.{Translation, Rotation}
+import BildPackage.Transformations.{Rotation, Translation}
 import BildPackage.{Bild, _}
 
 import scala.language.postfixOps
+import scala.util.Random
 
 object TryOutZone extends App {
 
@@ -18,11 +19,11 @@ object TryOutZone extends App {
   val centerOffset = halfPic - halfRect + 50
 
   BildScript(
-    resolutionX = 1000,
-    resolutionY = 1000,
+    resolutionX = 500,
+    resolutionY = 500,
     width = picWidth + 100,
     fileName = "image.png",
-    doAntiAliasing = true,
+    doAntiAliasing = false,
     visualizeBBox = false
   )(
     SolidSurface(HEX("111111")) +
@@ -30,7 +31,7 @@ object TryOutZone extends App {
     numRects * Bild (
 
       SolidSurface(
-        HSV(FromIndex(_ * (360 / (numRects / 10)) % 360), 1, 1)
+        HSV(SimpleRnd(_ * 100 % 360, gaussian = true), 1, 1)
       ) +
 
       RectMask(rectWidth, rectWidth) +

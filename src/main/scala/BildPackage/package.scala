@@ -1,15 +1,18 @@
 
 import scala.language.implicitConversions
+import scala.util.Random
 
 package object BildPackage {
 
   type ARGB = Int
 
   case class BildScript(resolutionX: Int, resolutionY: Int, width: Double, fileName: String,
-                        doAntiAliasing: Boolean = true, useBoundingBox: Boolean = true,
-                        visualizeBBox: Boolean = false) {
+                        doAntiAliasing: Boolean = true,
+                        useBoundingBox: Boolean = true,
+                        visualizeBBox: Boolean = false,
+                        randomSeed: Int = new Random().nextInt(10000)) {
     def apply(l: Seq[Addable]): Unit =
-      Bild(l).raster(resolutionX, resolutionY, width, fileName, doAntiAliasing, useBoundingBox, visualizeBBox)
+      Bild(l).raster(resolutionX, resolutionY, width, fileName, doAntiAliasing, useBoundingBox, visualizeBBox, randomSeed)
     def apply(a: Addable): Unit = apply(Seq(a))
   }
 
@@ -98,6 +101,15 @@ package object BildPackage {
   /**
     * From here: Color Utility Classes and Objects
     **/
+
+  class FixedColorGen(c: Color) extends Gen[Color] {
+    override val levels = Levels(0)
+    override def get: Color = c
+    override def next: Gen[Color] = this
+    override def generate(tc: Seq[Int]): Color = c
+  }
+
+  implicit def color2ColorGen(c: Color): Gen[Color] = new FixedColorGen(c)
 
   case class RGBA(red: Gen[Double], green: Gen[Double], blue: Gen[Double], alpha: Gen[Double], levels: Levels = Levels(0)) extends Gen[Color] {
     override def next: Gen[Color] = RGBA(red.next, green.next, blue.next, alpha.next)
