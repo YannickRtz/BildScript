@@ -11,7 +11,6 @@ object ToDos {
   // TODO: Add Shear Transformation
   // TODO: Add Reflection Transformation
   // TODO: Fix first row and first column
-  // TODO: Add a way to measure and display rendering times #
   // TODO: Compare different delta values for anti-aliasing
   // TODO: Introduce a way to render series of images for animations
   // TODO: Fix bottoms of circles

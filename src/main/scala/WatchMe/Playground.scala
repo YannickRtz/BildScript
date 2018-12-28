@@ -4,6 +4,7 @@ import BildPackage.Generators._
 import BildPackage.Masks._
 import BildPackage.Transformations._
 import BildPackage._
+import Meta.Measurement
 
 import scala.language.postfixOps
 

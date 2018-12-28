@@ -5,6 +5,7 @@ import java.io.File
 
 import BildPackage.Masks.RectMask
 import BildPackage.Transformations.Translation
+import Meta.Measurement
 import javax.imageio.ImageIO
 
 import scala.annotation.tailrec
@@ -159,17 +160,22 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
   def raster(resolutionX: Int, resolutionY: Int, width: Double, fileName: String, doAntiAliasing: Boolean,
              useBBox: Boolean, visualizeBBox: Boolean, randomSeed: Int): Unit = {
-    println("Executing walk...")
+    Measurement.take()
+    print("Executing walk...")
     walk(Seq(randomSeed, 0, 0))
     // The first element is the seed, the second is the animation frame, the third is the first level
     val bufferedImage = new BufferedImage(resolutionX, resolutionY, BufferedImage.TYPE_INT_ARGB)
     val pixelPerPoint = resolutionX.toDouble / width
-    println("Rasterizing...")
+    Measurement.take()
+    print("Rasterizing...")
     draw(bufferedImage, pixelPerPoint, Seq(), doAntiAliasing, useBBox, visualizeBBox)
-    println("File output...")
+    Measurement.take()
+    print("File output...")
     val outputfile = new File(fileName)
     ImageIO.write(bufferedImage, "png", outputfile)
+    Measurement.take()
     println("done")
+    Measurement.stop()
   }
 
 }

@@ -4,9 +4,9 @@ import BildPackage.Generators.{FromIndex, SimpleRnd}
 import BildPackage.Masks.RectMask
 import BildPackage.Transformations.{Rotation, Translation}
 import BildPackage.{Bild, _}
+import Meta.Measurement
 
 import scala.language.postfixOps
-import scala.util.Random
 
 object TryOutZone extends App {
 
@@ -19,11 +19,11 @@ object TryOutZone extends App {
   val centerOffset = halfPic - halfRect + 50
 
   BildScript(
-    resolutionX = 500,
-    resolutionY = 500,
+    resolutionX = 1000,
+    resolutionY = 1000,
     width = picWidth + 100,
     fileName = "image.png",
-    doAntiAliasing = false,
+    doAntiAliasing = true,
     visualizeBBox = false
   )(
     SolidSurface(HEX("111111")) +
