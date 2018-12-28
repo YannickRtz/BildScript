@@ -14,31 +14,35 @@ object Playground extends App {
     resolutionY = 1000,
     width = 100,
     fileName = "image.png",
-    doAntiAliasing = true
+    doAntiAliasing = false
   )(
     SolidSurface(HEX("111111")) +
     1000 * Bild (
       Translation(SimpleRnd(_ * 100 - 5), SimpleRnd(_ * 100)) +
       4 * Bild (
-        Scale(SimpleRnd(
-          x=> Math.abs(x * 0.17),
-          gaussian = true, Levels(1),
-          parentSeed = 123
-        )) +
-        Scale(
-          FromIndex(x=> (1+x)%2*0.14+0.5),
-          FromIndex(x=> (1+x)%2*0.14+0.5),
-          11, 0) +
-        Rotation(FromIndex(_ * 45), 10.65, 0) +
-        Scale(0.15, 1, 10, 10) +
-        SolidSurface(HSVA(
-          SimpleRnd(_ * 50 + 10, levels = Levels(1)),
-          0.5, 1,
-          SimpleRnd(x=> Math.abs(x * 0.13),
-            gaussian = true, Levels(1),
-            parentSeed = 123))) +
         RectMask(20) +
-        Rotation(45)
+        SolidSurface(HSVA(
+          SimpleRnd(x=> Math.abs(x * 110),
+            gaussian = true, Levels(1),
+            parentSeed = 123),
+          0.5, 1,
+          SimpleRnd(x=> Math.abs(x * 0.25),
+            gaussian = true, Levels(1),
+            parentSeed = 123)
+        )) +
+        Rotation(45) +
+        Scale(0.15, 1, 10, 10) +
+        Rotation(FromIndex(_ * 45 + 45), 10.65, 0) +
+        Scale(
+          FromIndex(_ % 2 * 0.14 + 0.5),
+          FromIndex(_ % 2 * 0.14 + 0.5),
+          10.65, 0
+        ) +
+        Scale(
+          SimpleRnd(x=> Math.abs(x * 0.17),
+          gaussian = true, Levels(1),
+          parentSeed = 123)
+        )
       )
     )
   )

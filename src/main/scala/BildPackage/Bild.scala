@@ -49,27 +49,24 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
 
   def draw(canvas: BufferedImage, pixelPerPoint: Double, prevTransformations: Seq[Transformation],
            doAntiAliasing: Boolean, useBBox: Boolean, visualizeBBox: Boolean): Unit = {
-    val allTransformations = prevTransformations ++ transformations
+    val allTransformations = prevTransformations ++ transformations.reverse
     if (fillings.nonEmpty) {
       val newTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
-      val prevNonlocalTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
-      val allNonlocalTransformations = allTransformations.filter {
-        case _: LocalTransform => false
-        case _ => true
-      }
-      newTransformations ++= allNonlocalTransformations
-      allTransformations.reverse.foreach {
+      val nonlocalTransformations: mutable.Buffer[Transformation] = mutable.Buffer()
+      allTransformations.foreach {
         case l: LocalTransform =>
-          // TODO: Check if possible: First localTransformations, then non local
-          val newPivot = l.pivotPoint.applyTransformsReverse(prevNonlocalTransformations)
-          val vector = newPivot.applyTransforms(allNonlocalTransformations)
-          newTransformations += Translation(-1 * vector.x, -1 * vector.y)
-          newTransformations += l
-          newTransformations += Translation(vector.x, vector.y)
+          // nonlocalTransformations contains only previous values at this point (mutable)
+          val vector = l.pivotPoint.applyTransforms(nonlocalTransformations)
+          newTransformations.prepend(
+            Translation(-1 * vector.x, -1 * vector.y),
+            l,
+            Translation(vector.x, vector.y))
 
         case t: Transformation =>
-          prevNonlocalTransformations += t
+          nonlocalTransformations += t
       }
+      // non local transformations need to go before any scaling or rotation
+      newTransformations.prependAll(nonlocalTransformations)
 
       // Enable drawing when no mask is set:
       val defaultMask =

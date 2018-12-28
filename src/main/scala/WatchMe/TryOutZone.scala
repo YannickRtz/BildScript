@@ -27,24 +27,19 @@ object TryOutZone extends App {
     visualizeBBox = false
   )(
     SolidSurface(HEX("111111")) +
-
     numRects * Bild (
-
       SolidSurface(
         HSV(SimpleRnd(_ * 100 % 360, gaussian = true), 1, 1)
       ) +
-
       RectMask(rectWidth, rectWidth) +
-
-      Translation(
-        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset),
-        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset)
-      ) +
-
       Rotation(
         FromIndex(_ * (360 / (numRects / 10)) % 360),
         FromIndex(_ * 0.002 * picWidth),
         FromIndex(_ * 0.002 * picWidth)
+      ) +
+      Translation(
+        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset),
+        FromIndex(_ * -1 * 0.002 * picWidth + centerOffset)
       )
     )
   )
