@@ -1,8 +1,8 @@
 package Meta
 
 object Measurement {
-  private var t0: Long = 0
-  private var overall0: Long = 0
+  private var t0: Long = System.nanoTime()
+  private var overall0: Long = System.nanoTime()
 
   def start(): Unit = {
     t0 = System.nanoTime()

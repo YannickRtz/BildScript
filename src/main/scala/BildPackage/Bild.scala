@@ -100,10 +100,12 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
               val subPixelColors = for (d <- Bild.subPixelDeltas) yield {
                 val withoutTransform = Point((x + d.x) / pixelPerPoint, (y + d.y) / pixelPerPoint)
                   .applyTransformsReverse(newTransformations)
-                if (m.test(withoutTransform)) {
+                val maskTest = Math.max(0, Math.min(1, m.test(withoutTransform)))
+                if (maskTest > 0) {
                   val subColor = originalColor.copy()
                   fillings.foreach { f =>
                     val fillingColor = f.trace(withoutTransform)
+                    fillingColor.alpha *= maskTest
                     subColor.overlayMutate(fillingColor)  // TODO: Check if mutable color are really faster
                   }
                   subColor
@@ -123,10 +125,12 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
           for (y <- minY until maxY) {
             for (x <- minX until maxX) {
               val withoutTransform = Point(x / pixelPerPoint,y / pixelPerPoint).applyTransformsReverse(newTransformations)
-              if (m.test(withoutTransform)) {
+              val maskTest = Math.max(0, Math.min(1, m.test(withoutTransform)))
+              if (maskTest > 0) {
                 val canvasColor = Color.fromARGB(canvas.getRGB(x, y))
                 fillings.foreach { f =>
                   val fillingColor = f.trace(withoutTransform)
+                  fillingColor.alpha *= maskTest
                   canvasColor.overlayMutate(fillingColor)
                 }
                 canvas.setRGB(x, y, canvasColor.toARGB)

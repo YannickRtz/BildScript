@@ -15,7 +15,7 @@ object Playground extends App {
     resolutionY = 1000,
     width = 100,
     fileName = "image.png",
-    doAntiAliasing = false
+    doAntiAliasing = true
   )(
     SolidSurface(HEX("111111")) +
     1000 * Bild (

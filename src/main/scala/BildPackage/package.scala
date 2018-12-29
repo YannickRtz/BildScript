@@ -42,7 +42,7 @@ package object BildPackage {
   trait Mask extends Addable {
     val boundingBoxDimensions: Point
     def next: Mask
-    def test(p: Point): Boolean
+    def test(p: Point): Double
   }
 
   trait Transformation extends Addable {
