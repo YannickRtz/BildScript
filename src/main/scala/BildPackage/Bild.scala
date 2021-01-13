@@ -94,7 +94,11 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
         }
 
         if (doAntiAliasing) {
+          // var y = minY
+          // while (y < maxY) {
           for (y <- minY until maxY) {
+            // var x = minX
+            // while (x < maxX) {
             for (x <- minX until maxX) {
               val originalColor = Color.fromARGB(canvas.getRGB(x, y))
               val subPixelColors = for (d <- Bild.subPixelDeltas) yield {
@@ -117,7 +121,9 @@ class Bild(masks: Seq[Mask], fillings: Seq[Filling], transformations: Seq[Transf
               val averageColor = averageColors(subPixelColors)
               originalColor.overlayMutate(averageColor)
               canvas.setRGB(x, y, originalColor.toARGB)
+              // x += 1
             }
+            // y += 1
           }
 
         } else {  // No anti aliasing:

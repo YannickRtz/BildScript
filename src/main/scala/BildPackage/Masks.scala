@@ -23,8 +23,11 @@ object Masks {
                       gradientGamma: Gen[Double] = 1) extends Mask {
     // TODO: Input should probably be diameter
     override lazy val boundingBoxDimensions: Point = Point(radius * 2, radius * 2)
-    override def walk(tc: Seq[Int]): Unit = radius.walk(tc)
-    override def next: CircMask = CircMask(radius.next, gradientFunc, gradientGamma)
+    override def walk(tc: Seq[Int]): Unit = {
+      radius.walk(tc)
+      gradientGamma.walk(tc)
+    }
+    override def next: CircMask = CircMask(radius.next, gradientFunc, gradientGamma.next)
     override def test(p: Point): Double = {
       val distance = Point(p.x - radius, p.y - radius).length
       if (distance > radius || radius.get == 0) 0

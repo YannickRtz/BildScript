@@ -15,10 +15,14 @@ object Playground extends App {
     resolutionY = 1000,
     width = 100,
     fileName = "image.png",
-    doAntiAliasing = true
+    doAntiAliasing = false
   )(
     SolidSurface(HEX("111111")) +
     1000 * Bild (
+      Scale(
+        SimpleRnd(x=> Math.abs(x * 0.17),
+        gaussian = true, parentSeed = 123)
+      ) +
       Translation(SimpleRnd(_ * 100 - 5), SimpleRnd(_ * 100)) +
       4 * Bild (
         RectMask(20) +
@@ -39,11 +43,6 @@ object Playground extends App {
           FromIndex(_ % 2 * 0.14 + 0.5),
           10.65, 0
         ) +
-        Scale(
-          SimpleRnd(x=> Math.abs(x * 0.17),
-          gaussian = true, Levels(1),
-          parentSeed = 123)
-        )
       )
     )
   )
